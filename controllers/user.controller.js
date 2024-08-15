@@ -25,7 +25,6 @@ module.exports.signUp = async (req, res) => {
     });
   } else {
     const user = new User({
-      photo: "default",
       username: username,
       password: password,
       number: number,

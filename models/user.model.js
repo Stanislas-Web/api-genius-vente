@@ -6,7 +6,13 @@ const userSchema = new Schema({
     username: { type: String, required: true },
     number: { type: String, required: true },
     photo: {type: String, required: true},
-    email: {type: String, required: true}
+    email: {type: String, required: true},
+    entreprise: {type: String, required: true},
+    adress: {type: String, required: true},
+    country: {type: String, required: true},
+    ville: {type: String, required: true},
+    Category: {type: String, required: true},
+    whatsapp: {type: String, required: true},
 },{timestamps: true, versionKey: false });
 
 module.exports.User = model('User', userSchema);

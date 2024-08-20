@@ -126,8 +126,7 @@ module.exports.login = async (req, res) => {
           });
         
     } else {
-        return res.status(400).send({message:"Numéro de téléphone ou mot de passe incorrecte"});
-        
+        return res.status(400).send({message:"Numéro de téléphone ou mot de passe incorrecte"});       
     }
   } else {
     return res.status(400).send({message:"Numéro de téléphone ou mot de passe incorrecte" });

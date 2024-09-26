@@ -3,12 +3,10 @@ const { Category } = require("../models/category.model");
 
 module.exports.createCategory = async (req, res) => {
   const {
-    image,
     libele
   } = req.body;
 
   const category = new Category({
-    image: image,
     libele: libele,
   });
 
@@ -28,3 +26,38 @@ module.exports.getAllCategories = async (req, res) => {
     data: result,
   });
 };
+
+module.exports.saveManyCategories = async (req, res) => {
+  try {
+    // Supposons que les données sont envoyées dans le corps de la requête
+    const { entreprises } = req.body;
+
+    if (!entreprises || !Array.isArray(entreprises)) {
+      return res.status(400).send({
+        message: "Les données d'entrée sont invalides. Attendu un tableau d'entreprises.",
+      });
+    }
+
+    // Transformez les données en objets Category
+    const categories = entreprises.map(item => ({
+      libele: item.libele
+    }));
+
+    // Utilisez insertMany pour sauvegarder plusieurs documents à la fois
+    const result = await Category.insertMany(categories);
+
+    return res.status(201).send({
+      message: "Catégories sauvegardées avec succès",
+      data: result,
+    });
+  } catch (error) {
+    console.error('Erreur lors de la sauvegarde des catégories:', error);
+    return res.status(500).send({
+      message: "Une erreur est survenue lors de la sauvegarde des catégories",
+      error: error.message
+    });
+  }
+};
+
+
+

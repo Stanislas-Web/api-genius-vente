@@ -7,14 +7,9 @@ module.exports.signUp = async (req, res) => {
   const password = await bcrypt.hash(req.body.password, 10);
   const number = req.body.number;
   const username = req.body.username;
-  const email = req.body.email;
   const entreprise = req.body.entreprise;
-  const adress = req.body.adress;
-  const country = req.body.country;
-  const ville = req.body.ville;
   const Category = req.body.Category;
   const whatsapp = req.body.whatsapp;
-
 
 
   const numberExist = await User.findOne({ number: number });
@@ -28,11 +23,7 @@ module.exports.signUp = async (req, res) => {
       username: username,
       password: password,
       number: number,
-      email: email,
       entreprise: entreprise,
-      adress: adress,
-      country: country,
-      ville: ville,
       Category: Category,
       whatsapp: whatsapp
     });

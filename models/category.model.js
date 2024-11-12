@@ -1,7 +1,20 @@
-const {Schema, model} = require('mongoose');
+const { Schema, model } = require('mongoose');
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Category:
+ *       type: object
+ *       required:
+ *         - name
+ *       properties:
+ *         name:
+ *           type: string
+ *           description: The name of the category
+ */
 const categorySchema = new Schema({
-    libele: { type: String, required: true },
-},{timestamps: true, versionKey: false });
+  name: { type: String, required: true },
+}, { timestamps: true, versionKey: false });
 
 module.exports.Category = model('Category', categorySchema);

@@ -1,13 +1,47 @@
-const {Schema, model} = require('mongoose');
-// const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 
-const userSchema = new Schema({
-    password: { type: String, required: true },
-    username: { type: String, required: true },
-    number: { type: String, required: true },
-    entreprise: {type: String, required: true},
-    Category: {type: String, required: true},
-    whatsapp: {type: String, required: true},
-},{timestamps: true, versionKey: false });
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - username
+ *         - password
+ *         - phone
+ *         - role
+ *         - companyId
+ *       properties:
+ *         username:
+ *           type: string
+ *           description: Nom d'utilisateur
+ *         password:
+ *           type: string
+ *           description: Mot de passe de l'utilisateur
+ *         phone:
+ *           type: string
+ *           description: Numéro de téléphone de l'utilisateur
+ *         role:
+ *           type: string
+ *           enum: [Admin, Seller]
+ *           description: Rôle de l'utilisateur dans l'entreprise
+ *         companyId:
+ *           type: string
+ *           description: Référence à l'entreprise à laquelle l'utilisateur est affilié
+ *         registrationDate:
+ *           type: string
+ *           format: date
+ *           description: Date d'inscription de l'utilisateur
+ */
 
-module.exports.User = model('User', userSchema);
+const userSchema = new mongoose.Schema({
+  username: { type: String, required: true },
+  password: { type: String, required: true },
+  phone: { type: String, required: true, unique: true },
+  role: { type: String, enum: ['Admin', 'Seller'], required: true },
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
+  lastLogin: { type: Date }
+}, { timestamps: true, versionKey: false });
+
+module.exports = mongoose.model('User', userSchema);

@@ -12,6 +12,22 @@ exports.createCategory = async (req, res) => {
   }
 };
 
+module.exports.createManyCategories = async (req, res) => {
+  const categories = req.body.categories; 
+  try {
+    const result = await Category.insertMany(categories);
+    return res.status(200).send({
+      message: "All categories inserted successfully",
+      data: result,
+    });
+  } catch (error) {
+    return res.status(500).send({
+      message: "Error inserting categories",
+      error: error.message,
+    });
+  }
+};
+
 // Get all categories
 exports.getAllCategories = async (req, res) => {
   try {

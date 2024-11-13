@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { createCategory, getAllCategories, updateCategory, deleteCategory } = require('../controllers/category.controller');
+const { createCategory, createManyCategories, getAllCategories, updateCategory, deleteCategory } = require('../controllers/category.controller');
 const { isLoggedIn } = require('../middleware');
 
 /**
@@ -28,6 +28,30 @@ const { isLoggedIn } = require('../middleware');
  *         description: Catégorie créée avec succès
  */
 router.post('/categories', createCategory);
+/**
+ * @swagger
+ * /categories/many:
+ *   post:
+ *     summary: Création de plusieurs categories
+ *     tags: [Category]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               categories:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/Category'
+ *     responses:
+ *       200:
+ *         description: Toutes les categories ont été insérées avec succès
+ *       500:
+ *         description: Erreur lors de l'insertion des categories
+ */
+router.route('/categories/many').post(createManyCategories);
 
 /**
  * @swagger

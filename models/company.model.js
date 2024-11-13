@@ -43,4 +43,4 @@ const companySchema = new Schema({
   category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
 }, { timestamps: true, versionKey: false });
 
-module.exports = model('Company', companySchema);
+module.exports.Company = model('Company', companySchema);

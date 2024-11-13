@@ -1,5 +1,5 @@
+const { Schema, model } = require('mongoose');
 const mongoose = require('mongoose');
-
 /**
  * @swagger
  * components:
@@ -29,13 +29,9 @@ const mongoose = require('mongoose');
  *         companyId:
  *           type: string
  *           description: Référence à l'entreprise à laquelle l'utilisateur est affilié
- *         registrationDate:
- *           type: string
- *           format: date
- *           description: Date d'inscription de l'utilisateur
  */
 
-const userSchema = new mongoose.Schema({
+const userSchema = new Schema({
   username: { type: String, required: true },
   password: { type: String, required: true },
   phone: { type: String, required: true, unique: true },
@@ -44,4 +40,4 @@ const userSchema = new mongoose.Schema({
   lastLogin: { type: Date }
 }, { timestamps: true, versionKey: false });
 
-module.exports = mongoose.model('User', userSchema);
+module.exports.User = model('User', userSchema);

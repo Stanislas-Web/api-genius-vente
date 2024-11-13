@@ -1,14 +1,23 @@
-const { sign } = require('jsonwebtoken');
 const {Company} = require('../models/company.model');
+const {Category} = require('../models/category.model');
 
 // Add a new company
 exports.createCompany = async (req, res) => {
   try {
-    const { name, address, currency, signCurrency, lang, country, category} = req.body;
-    const company = new Company({ name, address, currency, signCurrency, lang, country, category});
+    const { name, address, currency, signCurrency, lang, country, category } = req.body;
+
+    // Vérification si la catégorie existe
+    const categoryExists = await Category.findById(category);
+    if (!categoryExists) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+
+    // Création de la société
+    const company = new Company({ name, address, currency, signCurrency, lang, country, category });
     await company.save();
     res.status(201).json({ message: 'Company created successfully', company });
   } catch (error) {
+    console.error('Error creating company:', error); // Log de l'erreur pour plus de détails
     res.status(500).json({ message: 'Error creating company', error });
   }
 };

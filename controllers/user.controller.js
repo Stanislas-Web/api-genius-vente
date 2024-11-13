@@ -65,9 +65,8 @@ module.exports.login = async (req, res) => {
     const password = req.body.password;
     const phone = req.body.phone; 
 
-    console.log(req.body);
 
-    const checkUser = await User.findOne(phone).populate('companyId');
+    const checkUser = await User.findOne({ phone: phone }).populate('companyId');
 
     console.log(checkUser);
 

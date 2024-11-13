@@ -1,10 +1,11 @@
+const { sign } = require('jsonwebtoken');
 const {Company} = require('../models/company.model');
 
 // Add a new company
 exports.createCompany = async (req, res) => {
   try {
     const { name, address, category} = req.body;
-    const company = new Company({ name, address, category});
+    const company = new Company({ name, address, currency, signCurrency, category});
     await company.save();
     res.status(201).json({ message: 'Company created successfully', company });
   } catch (error) {

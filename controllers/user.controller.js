@@ -88,8 +88,6 @@ module.exports.login = async (req, res) => {
         return res.status(400).send({ message: "Numéro de téléphone ou mot de passe incorrect" });
     }
 };
-
-
 // Récupérer tous les utilisateurs
 module.exports.getAllUsers = async (req, res) => {
     try {

@@ -4,8 +4,8 @@ const {Company} = require('../models/company.model');
 // Add a new company
 exports.createCompany = async (req, res) => {
   try {
-    const { name, address, currency, signCurrency, lang, category} = req.body;
-    const company = new Company({ name, address, currency, signCurrency, lang, category});
+    const { name, address, currency, signCurrency, lang, country, category} = req.body;
+    const company = new Company({ name, address, currency, signCurrency, lang, country, category});
     await company.save();
     res.status(201).json({ message: 'Company created successfully', company });
   } catch (error) {

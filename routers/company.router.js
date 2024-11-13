@@ -43,6 +43,9 @@ const { createCompany, getAllCompanies, getCompanyById, updateCompany, deleteCom
  *               lang:
  *                 type: string
  *                 description: langue de l'entreprise
+ *               country:
+ *                 type: string
+ *                 description: langue de l'entreprise
  *               category:
  *                 type: string
  *                 description: Catégorie de l'entreprise

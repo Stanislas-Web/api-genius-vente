@@ -26,6 +26,9 @@ const mongoose = require('mongoose');
  *         lang:
  *           type: string
  *           description: lang of the company
+ *         country:
+ *           type: string
+ *           description: country of the company
  *         category:
  *           type: string
  *           description: The category of the company (reference to the Category model)
@@ -36,6 +39,7 @@ const companySchema = new Schema({
   currency: { type: String, required: true },
   signCurrency: { type: String, required: true },
   lang: { type: String, required: true },
+  country: { type: String, required: true },
   category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
 }, { timestamps: true, versionKey: false });
 

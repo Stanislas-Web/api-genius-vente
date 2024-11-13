@@ -25,7 +25,8 @@ const { createCompany, getAllCompanies, getCompanyById, updateCompany, deleteCom
  *               - address
  *               - category
  *               - currency
- *               - signCurrency         
+ *               - signCurrency 
+ *               - lang        
  *             properties:
  *               name:
  *                 type: string
@@ -39,6 +40,9 @@ const { createCompany, getAllCompanies, getCompanyById, updateCompany, deleteCom
  *               signCurrency:
  *                 type: string
  *                 description: signCurrency de l'entreprise
+ *               lang:
+ *                 type: string
+ *                 description: langue de l'entreprise
  *               category:
  *                 type: string
  *                 description: Catégorie de l'entreprise

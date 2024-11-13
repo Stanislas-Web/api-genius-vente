@@ -19,10 +19,13 @@ const mongoose = require('mongoose');
  *           description: The address of the company
  *         currency:
  *           type: string
- *           description: currency of the company (default: USD)
+ *           description: currency of the company
  *         signCurrency:
  *           type: string
- *           description: signCurrency of the company (default: $)
+ *           description: signCurrency of the company 
+ *         lang:
+ *           type: string
+ *           description: lang of the company
  *         category:
  *           type: string
  *           description: The category of the company (reference to the Category model)
@@ -32,6 +35,7 @@ const companySchema = new Schema({
   address: { type: String },
   currency: { type: String, required: true },
   signCurrency: { type: String, required: true },
+  lang: { type: String, required: true },
   category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
 }, { timestamps: true, versionKey: false });
 

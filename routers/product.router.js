@@ -19,6 +19,7 @@ const { isLoggedIn } = require('../middleware');  // Import du middleware isLogg
  *               - description
  *               - purchasePrice
  *               - salePrice
+ *               - code
  *               - quantity
  *               - companyId
  *             properties:
@@ -37,6 +38,9 @@ const { isLoggedIn } = require('../middleware');  // Import du middleware isLogg
  *               quantity:
  *                 type: number
  *                 description: Quantité en stock du produit
+ *               code:
+ *                 type: string
+ *                 description: code du produit 
  *               companyId:
  *                 type: string
  *                 description: ID de l'entreprise associée au produit

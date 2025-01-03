@@ -9,6 +9,7 @@ const CompanyRouter = require('./routers/company.router');
 const ReportRouter = require('./routers/report.router');
 const StockMouvementRouter = require('./routers/stockMouvement.router');
 const SaleRouter = require('./routers/sale.router');
+const ProductRouter = require('./routers/product.router');
 
 
 
@@ -59,7 +60,7 @@ app.use(express.json());
 
 
 
-app.use('/api/v1/', CategoryRouter, UserRouter, CompanyRouter, ReportRouter, StockMouvementRouter, SaleRouter);
+app.use('/api/v1/', CategoryRouter, UserRouter, CompanyRouter, ReportRouter, StockMouvementRouter, SaleRouter, ProductRouter);
 
 // Middleware Swagger Docs
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));

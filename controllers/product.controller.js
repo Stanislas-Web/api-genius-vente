@@ -1,16 +1,30 @@
-const {Product} = require('../models/product.model');
+const mongoose = require('mongoose');
+const Product  = require('../models/product.model');
 
-// Add a new product
 exports.createProduct = async (req, res) => {
   try {
-    const { name, purchasePrice, salePrice, code, quantity, companyId } = req.body;
+    const { name, description, purchasePrice, salePrice, code, quantity, companyId } = req.body;
+
+    // Validate required fields
+    if (!name || !purchasePrice || !salePrice || !quantity || !companyId) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    // Validate companyId
+    if (!mongoose.Types.ObjectId.isValid(companyId)) {
+      return res.status(400).json({ message: "Invalid companyId" });
+    }
+
+    // Create and save product
     const product = new Product({ name, description, purchasePrice, salePrice, code, quantity, companyId });
     await product.save();
     res.status(201).json({ message: 'Product created successfully', product });
   } catch (error) {
-    res.status(500).json({ message: 'Error creating product', error });
+    console.error(error); // Log the error
+    res.status(500).json({ message: 'Error creating product', error: error.message });
   }
 };
+
 
 // Get all products
 exports.getAllProducts = async (req, res) => {
@@ -25,18 +39,18 @@ exports.getAllProducts = async (req, res) => {
 
 // Get products by Company ID
 exports.getProductsByCompanyId = async (req, res) => {
-    try {
-      const { companyId } = req.params; // Récupérer le companyId depuis les paramètres de l'URL
-      const products = await Product.find({ companyId }).populate('companyId');
-      if (!products || products.length === 0) {
-        return res.status(404).json({ message: 'No products found for this company' });
-      }
-      res.status(200).json({ products });
-    } catch (error) {
-      res.status(500).json({ message: 'Error fetching products for company', error });
+  try {
+    const { companyId } = req.params; // Récupérer le companyId depuis les paramètres de l'URL
+    const products = await Product.find({ companyId }).populate('companyId');
+    if (!products || products.length === 0) {
+      return res.status(404).json({ message: 'No products found for this company' });
     }
-  };
-  
+    res.status(200).json({ products });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching products for company', error });
+  }
+};
+
 
 // Get a product by ID
 exports.getProductById = async (req, res) => {

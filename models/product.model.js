@@ -12,11 +12,16 @@ const mongoose = require('mongoose');
  *         - purchasePrice
  *         - salePrice
  *         - quantity
+ *         - code
+ *         - description
  *         - companyId
  *       properties:
  *         name:
  *           type: string
  *           description: The name of the product
+ *         description:
+ *           type: string
+ *           description: The description of the product
  *         code:
  *           type: string
  *           description: The code of the product
@@ -50,11 +55,11 @@ const mongoose = require('mongoose');
 const productSchema = new Schema({
   name: { type: String, required: true },
   code: { type: String},
+  description: { type: String},
   purchasePrice: { type: Number, required: true },
   salePrice: { type: Number, required: true },
   quantity: { type: Number, required: true },
   companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
-  dateAdded: { type: Date, default: Date.now }
 }, { timestamps: true, versionKey: false });
 
 module.exports = model('Product', productSchema);

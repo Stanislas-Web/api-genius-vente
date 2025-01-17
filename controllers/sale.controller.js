@@ -1,5 +1,5 @@
-const { Sale } = require('../models/sale.model');
-const { Product } = require('../models/product.model');
+const Sale = require('../models/sale.model');
+const Product = require('../models/product.model');
 const { Company } = require('../models/company.model');
 
 // Créer une vente
@@ -57,13 +57,19 @@ exports.createSale = async (req, res) => {
       discount: discount || 0,
       status: 'completed',
     });
+    
 
     // Sauvegarder la vente
     await sale.save();
 
     res.status(201).json({ message: 'Sale created successfully', sale });
   } catch (error) {
-    res.status(500).json({ message: 'Error creating sale', error });
+    console.error('Error creating sale:', error);
+    res.status(500).json({ 
+      message: 'Error creating sale', 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+    });
   }
 };
 

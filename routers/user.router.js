@@ -3,7 +3,7 @@ const { signUp, login, getAllUsers, updateUser, deleteUser, toggleUserStatus, up
 const {isLoggedIn} = require('../middleware');
 /**
  * @swagger
- * /signup:
+ * /users/signup:
  *   post:
  *     summary: Inscription d'un nouvel utilisateur
  *     tags: [Users]
@@ -23,11 +23,11 @@ const {isLoggedIn} = require('../middleware');
  *       400:
  *         description: Données invalides
  */
-router.route('/signup').post(signUp);
+router.route('/users/signup').post(signUp);
 
 /**
  * @swagger
- * /login:
+ * /users/login:
  *   post:
  *     summary: Connexion d'un utilisateur
  *     tags: [Users]
@@ -60,7 +60,7 @@ router.route('/signup').post(signUp);
  *       401:
  *         description: Authentification échouée
  */
-router.route('/login').post(login);
+router.route('/users/login').post(login);
 /**
  * @swagger
  * /users:

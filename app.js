@@ -58,8 +58,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routes publiques (sans authentification)
-app.use('/api/v1/login', UserRouter);
-app.use('/api/v1/signup', UserRouter);
+app.use('/api/v1', UserRouter);
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 // Routes protégées (avec authentification)

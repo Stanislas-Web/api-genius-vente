@@ -32,7 +32,6 @@ exports.createSale = async (req, res) => {
       if (productRecord.quantity < quantity) {
         return res.status(400).json({ message: `Not enough stock for product: ${productId}` });
       }
-
       // Calculer le total pour ce produit
       product.total = unitPrice * quantity;
       totalAmount += product.total;

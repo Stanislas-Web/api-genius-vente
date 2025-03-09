@@ -1,9 +1,10 @@
 const router = require('express').Router();
 const { signUp, login, getAllUsers, updateUser, deleteUser, toggleUserStatus, uploadUserPhoto, getUserPhoto } = require('../controllers/user.controller');
 const {isLoggedIn} = require('../middleware');
+
 /**
  * @swagger
- * /users/signup:
+ * /auth/signup:
  *   post:
  *     summary: Inscription d'un nouvel utilisateur
  *     tags: [Users]
@@ -23,11 +24,11 @@ const {isLoggedIn} = require('../middleware');
  *       400:
  *         description: Données invalides
  */
-router.route('/users/signup').post(signUp);
+router.route('/signup').post(signUp);
 
 /**
  * @swagger
- * /users/login:
+ * /auth/login:
  *   post:
  *     summary: Connexion d'un utilisateur
  *     tags: [Users]
@@ -60,7 +61,8 @@ router.route('/users/signup').post(signUp);
  *       401:
  *         description: Authentification échouée
  */
-router.route('/users/login').post(login);
+router.route('/login').post(login);
+
 /**
  * @swagger
  * /users:

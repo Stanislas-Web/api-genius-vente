@@ -57,8 +57,12 @@ const swaggerSpecs = swaggerJsdoc(swaggerOptions);
 app.use(cors());
 app.use(express.json());
 
+// Route spécifique pour le login
+app.post('/api/v1/login', require('./controllers/user.controller').login);
+app.post('/api/v1/signup', require('./controllers/user.controller').signUp);
+
 // Routes publiques (sans authentification)
-app.use('/api/v1', UserRouter);
+app.use('/api/v1/auth', UserRouter);
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 // Routes protégées (avec authentification)

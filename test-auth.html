@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Authentication</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Test Authentication</h1>
+    
+    <div>
+        <h2>Login</h2>
+        <form id="loginForm">
+            <div>
+                <label for="loginPhone">Phone:</label>
+                <input type="text" id="loginPhone" name="phone" required>
+            </div>
+            <div>
+                <label for="loginPassword">Password:</label>
+                <input type="password" id="loginPassword" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        <div id="loginResult"></div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const phone = document.getElementById('loginPhone').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            // Test different endpoints
+            const endpoints = [
+                '/api/v1/login',
+                '/api/v1/auth/login',
+                '/login'
+            ];
+            
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.innerHTML = '';
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const result = document.createElement('div');
+                    result.innerHTML = `<strong>Testing ${endpoint}:</strong> `;
+                    
+                    try {
+                        const response = await axios.post(endpoint, { phone, password });
+                        result.innerHTML += `Success! Response: ${JSON.stringify(response.data)}`;
+                        result.style.color = 'green';
+                    } catch (error) {
+                        result.innerHTML += `Error: ${error.message}`;
+                        if (error.response) {
+                            result.innerHTML += ` (Status: ${error.response.status})`;
+                        }
+                        result.style.color = 'red';
+                    }
+                    
+                    resultDiv.appendChild(result);
+                } catch (error) {
+                    console.error('Error testing endpoint:', endpoint, error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

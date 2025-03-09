@@ -10,8 +10,7 @@ const ReportRouter = require('./routers/report.router');
 const StockMouvementRouter = require('./routers/stockMouvement.router');
 const SaleRouter = require('./routers/sale.router');
 const ProductRouter = require('./routers/product.router');
-
-
+const { isLoggedIn } = require('./middleware');
 
 const app = express();
 
@@ -29,11 +28,12 @@ const swaggerOptions = {
         },
       },
     },
-    security: [
-      {
-        bearerAuth: [],
-      },
-    ],
+    // Retirer la sécurité globale pour permettre l'accès à la documentation sans authentification
+    // security: [
+    //   {
+    //     bearerAuth: [],
+    //   },
+    // ],
     info: {
       title: 'Stock Management API',
       version: '1.0.0',
@@ -57,12 +57,18 @@ const swaggerSpecs = swaggerJsdoc(swaggerOptions);
 app.use(cors());
 app.use(express.json());
 
-
-
-
-app.use('/api/v1/', CategoryRouter, UserRouter, CompanyRouter, ReportRouter, StockMouvementRouter, SaleRouter, ProductRouter);
-
-// Middleware Swagger Docs
+// Routes publiques (sans authentification)
+app.use('/api/v1/login', UserRouter);
+app.use('/api/v1/signup', UserRouter);
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+
+// Routes protégées (avec authentification)
+app.use('/api/v1/categories', isLoggedIn, CategoryRouter);
+app.use('/api/v1/users', isLoggedIn, UserRouter);
+app.use('/api/v1/companies', isLoggedIn, CompanyRouter);
+app.use('/api/v1/reports', isLoggedIn, ReportRouter);
+app.use('/api/v1/stock-mouvements', isLoggedIn, StockMouvementRouter);
+app.use('/api/v1/sales', isLoggedIn, SaleRouter);
+app.use('/api/v1/products', isLoggedIn, ProductRouter);
 
 module.exports = app;

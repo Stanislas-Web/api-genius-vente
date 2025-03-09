@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createSale, getAllSales, getSaleById, updateSale, deleteSale } = require('../controllers/sale.controller');
+const { createSale, getAllSales, getSaleById, updateSale, deleteSale, createManySales } = require('../controllers/sale.controller');
 const { isLoggedIn } = require('../middleware');
 
 /**
@@ -91,7 +91,95 @@ const { isLoggedIn } = require('../middleware');
  *         description: Company or Product not found
  */
 
-router.route('/sales').post(isLoggedIn, createSale);
+/**
+ * @swagger
+ * /sales/many:
+ *   post:
+ *     summary: Create multiple sales in a single request
+ *     tags: [Sales]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - sales
+ *             properties:
+ *               sales:
+ *                 type: array
+ *                 description: Array of sales to create
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - companyId
+ *                     - products
+ *                     - userId
+ *                     - paymentMode
+ *                   properties:
+ *                     companyId:
+ *                       type: string
+ *                       description: ID of the company making the sale
+ *                     products:
+ *                       type: array
+ *                       description: List of products sold
+ *                       items:
+ *                         type: object
+ *                         required:
+ *                           - productId
+ *                           - quantity
+ *                           - unitPrice
+ *                         properties:
+ *                           productId:
+ *                             type: string
+ *                             description: ID of the product sold
+ *                           quantity:
+ *                             type: number
+ *                             description: Quantity of the product sold
+ *                           unitPrice:
+ *                             type: number
+ *                             description: Price per unit of the product
+ *                     userId:
+ *                       type: string
+ *                       description: ID of the user processing the sale
+ *                     paymentMode:
+ *                       type: string
+ *                       enum: [Cash, Card]
+ *                       description: Mode of payment for the transaction
+ *                     discount:
+ *                       type: number
+ *                       description: Discount applied to the sale (optional)
+ *     responses:
+ *       201:
+ *         description: Sales created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Successfully created 3 sales
+ *                 sales:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Sale'
+ *                 errors:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       index:
+ *                         type: number
+ *                         description: Index of the sale in the input array that caused an error
+ *                       message:
+ *                         type: string
+ *                         description: Error message
+ *       400:
+ *         description: Bad request, validation error
+ *       500:
+ *         description: Server error
+ */
 
 /**
  * @swagger
@@ -120,7 +208,6 @@ router.route('/sales').post(isLoggedIn, createSale);
  *       404:
  *         description: No sales found for this company
  */
-router.route('/sales').get(isLoggedIn, getAllSales);
 
 /**
  * @swagger
@@ -145,7 +232,6 @@ router.route('/sales').get(isLoggedIn, getAllSales);
  *       404:
  *         description: Sale not found
  */
-router.route('/sales/:saleId').get(isLoggedIn, getSaleById);
 
 /**
  * @swagger
@@ -218,8 +304,6 @@ router.route('/sales/:saleId').get(isLoggedIn, getSaleById);
  *         description: Sale not found
  */
 
-router.route('/sales/:saleId').put(isLoggedIn, updateSale);
-
 /**
  * @swagger
  * /sales/{saleId}:
@@ -239,6 +323,13 @@ router.route('/sales/:saleId').put(isLoggedIn, updateSale);
  *       404:
  *         description: Sale not found
  */
-router.route('/sales/:saleId').delete(isLoggedIn, deleteSale);
+
+// Routes
+router.post('/', isLoggedIn, createSale);
+router.post('/many', isLoggedIn, createManySales);
+router.get('/', isLoggedIn, getAllSales);
+router.get('/:saleId', isLoggedIn, getSaleById);
+router.put('/:saleId', isLoggedIn, updateSale);
+router.delete('/:saleId', isLoggedIn, deleteSale);
 
 module.exports = router;

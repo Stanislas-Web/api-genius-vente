@@ -199,3 +199,114 @@ exports.deleteSale = async (req, res) => {
     res.status(500).json({ message: 'Error deleting sale', error });
   }
 };
+
+// Créer plusieurs ventes en une seule requête
+exports.createManySales = async (req, res) => {
+  try {
+    const { sales } = req.body;
+
+    // Validation des champs requis
+    if (!sales || !Array.isArray(sales) || sales.length === 0) {
+      return res.status(400).json({ message: 'Sales array is required and must not be empty' });
+    }
+
+    const createdSales = [];
+    const errors = [];
+
+    // Traiter chaque vente
+    for (let i = 0; i < sales.length; i++) {
+      const saleData = sales[i];
+      const { companyId, products, userId, paymentMode, discount } = saleData;
+
+      // Validation des champs requis pour chaque vente
+      if (!companyId || !products || !userId || !paymentMode) {
+        errors.push({ index: i, message: 'Missing required fields' });
+        continue;
+      }
+
+      try {
+        // Vérifier si l'entreprise existe
+        const company = await Company.findById(companyId);
+        if (!company) {
+          errors.push({ index: i, message: 'Company not found' });
+          continue;
+        }
+
+        // Calculer le montant total de la vente
+        let totalAmount = 0;
+        let productErrors = false;
+
+        for (let product of products) {
+          const { productId, quantity, unitPrice } = product;
+
+          // Vérifier si le produit existe et s'il y a suffisamment de stock
+          const productRecord = await Product.findById(productId);
+          if (!productRecord) {
+            errors.push({ index: i, message: `Product not found: ${productId}` });
+            productErrors = true;
+            break;
+          }
+
+          if (productRecord.quantity < quantity) {
+            errors.push({ index: i, message: `Not enough stock for product: ${productId}` });
+            productErrors = true;
+            break;
+          }
+
+          // Calculer le total pour ce produit
+          product.total = unitPrice * quantity;
+          totalAmount += product.total;
+
+          // Réduire la quantité du produit en stock
+          productRecord.quantity -= quantity;
+          await productRecord.save();
+        }
+
+        if (productErrors) continue;
+
+        // Appliquer la remise si elle existe
+        if (discount) {
+          totalAmount -= discount;
+        }
+
+        // Créer l'enregistrement de la vente
+        const sale = new Sale({
+          companyId,
+          products,
+          totalAmount,
+          userId,
+          paymentMode,
+          discount: discount || 0,
+          status: 'completed',
+        });
+
+        // Sauvegarder la vente
+        await sale.save();
+        createdSales.push(sale);
+      } catch (error) {
+        errors.push({ index: i, message: error.message });
+      }
+    }
+
+    // Retourner le résultat
+    if (createdSales.length === 0) {
+      return res.status(400).json({ 
+        message: 'No sales were created', 
+        errors 
+      });
+    }
+
+    res.status(201).json({ 
+      message: `Successfully created ${createdSales.length} sales`, 
+      sales: createdSales,
+      errors: errors.length > 0 ? errors : undefined
+    });
+  } catch (error) {
+    console.error('Error creating multiple sales:', error);
+    res.status(500).json({ 
+      message: 'Error creating multiple sales', 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+    });
+  }
+};

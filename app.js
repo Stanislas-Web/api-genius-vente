@@ -15,7 +15,6 @@ const { isLoggedIn } = require('./middleware');
 const app = express();
 
 // Configuration Swagger
-
 const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
@@ -28,12 +27,6 @@ const swaggerOptions = {
         },
       },
     },
-    // Retirer la sécurité globale pour permettre l'accès à la documentation sans authentification
-    // security: [
-    //   {
-    //     bearerAuth: [],
-    //   },
-    // ],
     info: {
       title: 'Stock Management API',
       version: '1.0.0',
@@ -41,13 +34,17 @@ const swaggerOptions = {
     },
     servers: [
       {
-        // url: 'http://134.122.23.150/api/v1',
-        url: 'http://localhost:8000/api/v1',
+        url: '/api/v1',
         description: 'Serveur de développement',
       },
     ],
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
   },
-  apis: ['./routers/*.js', './models/*.js'], // Assurez-vous que ces chemins sont corrects
+  apis: ['./routers/*.js', './models/*.js'],
 };
 
 // Middleware Swagger

@@ -1,11 +1,14 @@
-const router = require('express').Router();
+const express = require('express');
+const router = express.Router();
 const { generateSalesReport, generateProductReport, generateFinancialReport, generateCompanyReport } = require('../controllers/report.controller');
-const { isLoggedIn } = require('../middleware'); // Import du middleware isLoggedIn
+const { isLoggedIn } = require('../middleware');
 
 /**
  * @swagger
  * /reports/sales:
  *   post:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Générer un rapport de ventes pour une entreprise
  *     tags: [Reports]
  *     requestBody:
@@ -28,6 +31,10 @@ const { isLoggedIn } = require('../middleware'); // Import du middleware isLogge
  *               endDate:
  *                 type: string
  *                 description: Date de fin du rapport (format ISO 8601)
+ *           example:
+ *             companyId: "6734be089acec1931a6e0b42"
+ *             startDate: "2025-01-01"
+ *             endDate: "2025-12-31"
  *     responses:
  *       200:
  *         description: Rapport de ventes généré avec succès
@@ -36,12 +43,14 @@ const { isLoggedIn } = require('../middleware'); // Import du middleware isLogge
  *       404:
  *         description: Aucune vente trouvée pour cette période
  */
-router.post('/reports/sales', isLoggedIn, generateSalesReport); // Middleware isLoggedIn ajouté
+router.post('/sales', isLoggedIn, generateSalesReport);
 
 /**
  * @swagger
  * /reports/product:
  *   post:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Générer un rapport sur les produits d'une entreprise
  *     tags: [Reports]
  *     requestBody:
@@ -56,18 +65,22 @@ router.post('/reports/sales', isLoggedIn, generateSalesReport); // Middleware is
  *               companyId:
  *                 type: string
  *                 description: ID de l'entreprise pour laquelle générer le rapport des produits
+ *           example:
+ *             companyId: "6734be089acec1931a6e0b42"
  *     responses:
  *       200:
  *         description: Rapport des produits généré avec succès
  *       404:
  *         description: Aucun produit trouvé pour cette entreprise
  */
-router.post('/reports/product', isLoggedIn, generateProductReport); // Middleware isLoggedIn ajouté
+router.post('/product', isLoggedIn, generateProductReport);
 
 /**
  * @swagger
  * /reports/financial:
  *   post:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Générer un rapport financier pour une entreprise
  *     tags: [Reports]
  *     requestBody:
@@ -90,19 +103,25 @@ router.post('/reports/product', isLoggedIn, generateProductReport); // Middlewar
  *               endDate:
  *                 type: string
  *                 description: Date de fin du rapport (format ISO 8601)
+ *           example:
+ *             companyId: "6734be089acec1931a6e0b42"
+ *             startDate: "2025-01-01"
+ *             endDate: "2025-12-31"
  *     responses:
  *       200:
  *         description: Rapport financier généré avec succès
  *       400:
  *         description: Dates manquantes
  */
-router.post('/reports/financial', isLoggedIn, generateFinancialReport); // Middleware isLoggedIn ajouté
+router.post('/financial', isLoggedIn, generateFinancialReport);
 
 /**
  * @swagger
  * /reports/company:
  *   post:
- *     summary: Générer un rapport complet pour une entreprise, incluant les ventes et les produits
+ *     security:
+ *       - bearerAuth: []
+ *     summary: Générer un rapport complet pour une entreprise
  *     tags: [Reports]
  *     requestBody:
  *       required: true
@@ -112,16 +131,30 @@ router.post('/reports/financial', isLoggedIn, generateFinancialReport); // Middl
  *             type: object
  *             required:
  *               - companyId
+ *               - startDate
+ *               - endDate
  *             properties:
  *               companyId:
  *                 type: string
- *                 description: ID de l'entreprise pour laquelle générer un rapport complet
+ *                 description: ID de l'entreprise pour laquelle générer le rapport
+ *               startDate:
+ *                 type: string
+ *                 description: Date de début du rapport (format ISO 8601)
+ *               endDate:
+ *                 type: string
+ *                 description: Date de fin du rapport (format ISO 8601)
+ *           example:
+ *             companyId: "6734be089acec1931a6e0b42"
+ *             startDate: "2025-01-01"
+ *             endDate: "2025-12-31"
  *     responses:
  *       200:
- *         description: Rapport complet de l'entreprise généré avec succès
+ *         description: Rapport d'entreprise généré avec succès
+ *       400:
+ *         description: Données manquantes
  *       404:
- *         description: Aucun rapport trouvé pour cette entreprise
+ *         description: Entreprise non trouvée
  */
-router.post('/reports/company', isLoggedIn, generateCompanyReport); // Middleware isLoggedIn ajouté
+router.post('/company', isLoggedIn, generateCompanyReport);
 
 module.exports = router;

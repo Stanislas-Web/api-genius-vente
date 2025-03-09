@@ -1,4 +1,5 @@
-const router = require('express').Router();
+const express = require('express');
+const router = express.Router();
 const { 
   createStockMovement, 
   getAllStockMovements, 
@@ -10,141 +11,102 @@ const { isLoggedIn } = require('../middleware');
 
 /**
  * @swagger
- * /stock-movements:
+ * /api/v1/stock-mouvements:
  *   post:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Créer un nouveau mouvement de stock
- *     tags: [StockMovements]
+ *     tags: [StockMouvements]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/StockMovement'
+ *             $ref: '#/components/schemas/StockMouvement'
  *     responses:
  *       201:
  *         description: Mouvement de stock créé avec succès
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/StockMovement'
- *       400:
- *         description: Données invalides
  */
-router.route('/stock-movements').post(isLoggedIn, createStockMovement);
+router.post('/', isLoggedIn, createStockMovement);
 
 /**
  * @swagger
- * /stock-movements:
+ * /api/v1/stock-mouvements:
  *   get:
- *     summary: Récupérer tous les mouvements de stock
- *     tags: [StockMovements]
  *     security:
  *       - bearerAuth: []
+ *     summary: Récupérer tous les mouvements de stock
+ *     tags: [StockMouvements]
  *     responses:
  *       200:
  *         description: Liste des mouvements de stock récupérée avec succès
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/StockMovement'
- *       401:
- *         description: Authentification échouée
- *       500:
- *         description: Erreur du serveur
  */
-router.route('/stock-movements').get(isLoggedIn, getAllStockMovements);
+router.get('/', isLoggedIn, getAllStockMovements);
 
 /**
  * @swagger
- * /stock-movements/{id}:
+ * /api/v1/stock-mouvements/{id}:
  *   get:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Récupérer un mouvement de stock par ID
- *     tags: [StockMovements]
+ *     tags: [StockMouvements]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *         description: ID du mouvement de stock à récupérer
  *     responses:
  *       200:
  *         description: Mouvement de stock récupéré avec succès
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/StockMovement'
- *       404:
- *         description: Mouvement de stock non trouvé
- *       500:
- *         description: Erreur du serveur
  */
-router.route('/stock-movements/:id').get(isLoggedIn, getStockMovementById);
+router.get('/:id', isLoggedIn, getStockMovementById);
 
 /**
  * @swagger
- * /stock-movements/{id}:
+ * /api/v1/stock-mouvements/{id}:
  *   put:
- *     summary: Modifier un mouvement de stock par ID
- *     tags: [StockMovements]
+ *     security:
+ *       - bearerAuth: []
+ *     summary: Mettre à jour un mouvement de stock
+ *     tags: [StockMouvements]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *         description: ID du mouvement de stock à modifier
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/StockMovement'
+ *             $ref: '#/components/schemas/StockMouvement'
  *     responses:
  *       200:
- *         description: Mouvement de stock modifié avec succès
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/StockMovement'
- *       404:
- *         description: Mouvement de stock non trouvé
- *       500:
- *         description: Erreur interne du serveur
+ *         description: Mouvement de stock mis à jour avec succès
  */
-router.route('/stock-movements/:id').put(isLoggedIn, updateStockMovement);
+router.put('/:id', isLoggedIn, updateStockMovement);
 
 /**
  * @swagger
- * /stock-movements/{id}:
+ * /api/v1/stock-mouvements/{id}:
  *   delete:
- *     summary: Supprimer un mouvement de stock par ID
- *     tags: [StockMovements]
+ *     security:
+ *       - bearerAuth: []
+ *     summary: Supprimer un mouvement de stock
+ *     tags: [StockMouvements]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *         description: ID du mouvement de stock à supprimer
  *     responses:
  *       200:
  *         description: Mouvement de stock supprimé avec succès
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Mouvement de stock supprimé avec succès"
- *       404:
- *         description: Mouvement de stock non trouvé
- *       500:
- *         description: Erreur interne du serveur
  */
-router.route('/stock-movements/:id').delete(isLoggedIn, deleteStockMovement);
+router.delete('/:id', isLoggedIn, deleteStockMovement);
 
 module.exports = router;

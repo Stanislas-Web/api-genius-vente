@@ -1,11 +1,14 @@
-const router = require('express').Router();
+const express = require('express');
+const router = express.Router();
+const { isLoggedIn } = require('../middleware');
 const { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, getProductsByCompanyId } = require('../controllers/product.controller');
-const { isLoggedIn } = require('../middleware');  // Import du middleware isLoggedIn
 
 /**
  * @swagger
  * /products:
  *   post:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Créer un nouveau produit
  *     tags: [Products]
  *     requestBody:
@@ -48,12 +51,14 @@ const { isLoggedIn } = require('../middleware');  // Import du middleware isLogg
  *       201:
  *         description: Produit créé avec succès
  */
-router.post('/products', isLoggedIn, createProduct);  // Ajout du middleware isLoggedIn
+router.post('/', isLoggedIn, createProduct);
 
 /**
  * @swagger
  * /products:
  *   get:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Récupérer tous les produits
  *     tags: [Products]
  *     responses:
@@ -66,12 +71,37 @@ router.post('/products', isLoggedIn, createProduct);  // Ajout du middleware isL
  *               items:
  *                 $ref: '#/components/schemas/Product'
  */
-router.get('/products', isLoggedIn, getAllProducts);  // Ajout du middleware isLoggedIn
+router.get('/', isLoggedIn, getAllProducts);
+
+/**
+ * @swagger
+ * /products/company/{companyId}:
+ *   get:
+ *     security:
+ *       - bearerAuth: []
+ *     summary: Récupérer tous les produits d'une entreprise par ID
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: companyId
+ *         required: true
+ *         description: ID de l'entreprise pour laquelle récupérer les produits
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Liste des produits récupérée avec succès
+ *       404:
+ *         description: Aucun produit trouvé pour cette entreprise
+ */
+router.get('/company/:companyId', isLoggedIn, getProductsByCompanyId);
 
 /**
  * @swagger
  * /products/{id}:
  *   get:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Récupérer un produit par ID
  *     tags: [Products]
  *     parameters:
@@ -91,33 +121,14 @@ router.get('/products', isLoggedIn, getAllProducts);  // Ajout du middleware isL
  *       404:
  *         description: Produit non trouvé
  */
-router.get('/products/:id', isLoggedIn, getProductById);  // Ajout du middleware isLoggedIn
-
-/**
- * @swagger
- * /products/company/{companyId}:
- *   get:
- *     summary: Récupérer tous les produits d'une entreprise par ID
- *     tags: [Products]
- *     parameters:
- *       - in: path
- *         name: companyId
- *         required: true
- *         description: ID de l'entreprise pour laquelle récupérer les produits
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Liste des produits récupérée avec succès
- *       404:
- *         description: Aucun produit trouvé pour cette entreprise
- */
-router.get('/products/company/:companyId', isLoggedIn, getProductsByCompanyId);  // Ajout du middleware isLoggedIn
+router.get('/:id', isLoggedIn, getProductById);
 
 /**
  * @swagger
  * /products/{id}:
  *   put:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Mettre à jour un produit
  *     tags: [Products]
  *     parameters:
@@ -159,12 +170,14 @@ router.get('/products/company/:companyId', isLoggedIn, getProductsByCompanyId); 
  *       404:
  *         description: Produit non trouvé
  */
-router.put('/products/:id', isLoggedIn, updateProduct);  // Ajout du middleware isLoggedIn
+router.put('/:id', isLoggedIn, updateProduct);
 
 /**
  * @swagger
  * /products/{id}:
  *   delete:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Supprimer un produit
  *     tags: [Products]
  *     parameters:
@@ -180,6 +193,6 @@ router.put('/products/:id', isLoggedIn, updateProduct);  // Ajout du middleware 
  *       404:
  *         description: Produit non trouvé
  */
-router.delete('/products/:id', isLoggedIn, deleteProduct);  // Ajout du middleware isLoggedIn
+router.delete('/:id', isLoggedIn, deleteProduct);
 
 module.exports = router;

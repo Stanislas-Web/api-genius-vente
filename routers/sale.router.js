@@ -29,7 +29,7 @@ const { isLoggedIn } = require('../middleware');
 
 /**
  * @swagger
- * /sales:
+ * /:
  *   post:
  *     summary: Create a new sale
  *     tags: [Sales]
@@ -93,7 +93,7 @@ const { isLoggedIn } = require('../middleware');
 
 /**
  * @swagger
- * /sales/many:
+ * /many:
  *   post:
  *     summary: Create multiple sales in a single request
  *     tags: [Sales]
@@ -183,7 +183,7 @@ const { isLoggedIn } = require('../middleware');
 
 /**
  * @swagger
- * /sales:
+ * /:
  *   get:
  *     summary: Get all sales for a company
  *     tags: [Sales]
@@ -211,7 +211,7 @@ const { isLoggedIn } = require('../middleware');
 
 /**
  * @swagger
- * /sales/{saleId}:
+ * /{saleId}:
  *   get:
  *     summary: Get a specific sale by ID
  *     tags: [Sales]
@@ -235,7 +235,7 @@ const { isLoggedIn } = require('../middleware');
 
 /**
  * @swagger
- * /sales/{saleId}:
+ * /{saleId}:
  *   put:
  *     summary: Update a sale
  *     tags: [Sales]
@@ -306,7 +306,7 @@ const { isLoggedIn } = require('../middleware');
 
 /**
  * @swagger
- * /sales/{saleId}:
+ * /{saleId}:
  *   delete:
  *     summary: Delete a sale
  *     tags: [Sales]

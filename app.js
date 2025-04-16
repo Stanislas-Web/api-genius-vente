@@ -62,6 +62,9 @@ app.post('/api/v1/signup', require('./controllers/user.controller').signUp);
 app.use('/api/v1/auth', UserRouter);
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
+// Route GET des catégories (sans authentification)
+app.get('/api/v1/categories', require('./controllers/category.controller').getAllCategories);
+
 // Routes protégées (avec authentification)
 app.use('/api/v1/categories', isLoggedIn, CategoryRouter);
 app.use('/api/v1/users', isLoggedIn, UserRouter);

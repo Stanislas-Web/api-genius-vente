@@ -53,7 +53,7 @@ const { createCompany, getAllCompanies, getCompanyById, updateCompany, deleteCom
  *       201:
  *         description: Entreprise créée avec succès
  */
-router.post('/companies', createCompany);
+router.post('/', createCompany);
 
 /**
  * @swagger
@@ -71,7 +71,7 @@ router.post('/companies', createCompany);
  *               items:
  *                 $ref: '#/components/schemas/Company'
  */
-router.get('/companies', getAllCompanies);
+router.get('/', getAllCompanies);
 
 /**
  * @swagger
@@ -96,7 +96,7 @@ router.get('/companies', getAllCompanies);
  *       404:
  *         description: Entreprise non trouvée
  */
-router.get('/companies/:id', getCompanyById);
+router.get('/:id', getCompanyById);
 
 /**
  * @swagger
@@ -136,7 +136,7 @@ router.get('/companies/:id', getCompanyById);
  *       404:
  *         description: Entreprise non trouvée
  */
-router.put('/companies/:id', updateCompany);
+router.put('/:id', updateCompany);
 
 /**
  * @swagger
@@ -157,6 +157,6 @@ router.put('/companies/:id', updateCompany);
  *       404:
  *         description: Entreprise non trouvée
  */
-router.delete('/companies/:id', deleteCompany);
+router.delete('/:id', deleteCompany);
 
 module.exports = router;

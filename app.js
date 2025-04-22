@@ -11,6 +11,7 @@ const StockMouvementRouter = require('./routers/stockMouvement.router');
 const SaleRouter = require('./routers/sale.router');
 const ProductRouter = require('./routers/product.router');
 const { isLoggedIn } = require('./middleware');
+const { createCompany } = require('./controllers/company.controller');
 
 const app = express();
 
@@ -64,6 +65,9 @@ app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 // Route GET des catégories (sans authentification)
 app.get('/api/v1/categories', require('./controllers/category.controller').getAllCategories);
+
+// Route POST pour la création de compagnie (sans authentification)
+app.post('/api/v1/companies', createCompany);
 
 // Routes protégées (avec authentification)
 app.use('/api/v1/categories', isLoggedIn, CategoryRouter);

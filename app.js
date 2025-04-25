@@ -12,6 +12,7 @@ const SaleRouter = require('./routers/sale.router');
 const ProductRouter = require('./routers/product.router');
 const { isLoggedIn } = require('./middleware');
 const { createCompany } = require('./controllers/company.controller');
+const { generateSalesSummaryByPhone } = require('./controllers/report.controller');
 
 const app = express();
 
@@ -68,6 +69,9 @@ app.get('/api/v1/categories', require('./controllers/category.controller').getAl
 
 // Route POST pour la création de compagnie (sans authentification)
 app.post('/api/v1/companies', createCompany);
+
+// Route POST pour le résumé des ventes par téléphone (sans authentification)
+app.post('/api/v1/sales-summary-by-phone', generateSalesSummaryByPhone);
 
 // Routes protégées (avec authentification)
 app.use('/api/v1/categories', isLoggedIn, CategoryRouter);

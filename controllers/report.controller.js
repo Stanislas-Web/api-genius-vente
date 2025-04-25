@@ -30,16 +30,27 @@ const generateSalesReportData = async (companyId, startDate, endDate) => {
   // Produits les plus vendus
   const productSales = {};
   sales.forEach(sale => {
+    if (!sale.products || !Array.isArray(sale.products)) {
+      console.log('Sale missing products array:', sale._id);
+      return;
+    }
+    
     sale.products.forEach(prod => {
+      // Vérifier si productId existe et a un _id
+      if (!prod || !prod.productId || !prod.productId._id) {
+        console.log('Invalid product in sale:', sale._id);
+        return;
+      }
+      
       if (!productSales[prod.productId._id]) {
         productSales[prod.productId._id] = {
-          productName: prod.productId.name,
+          productName: prod.productId.name || 'Unknown Product',
           quantity: 0,
           revenue: 0
         };
       }
-      productSales[prod.productId._id].quantity += prod.quantity;
-      productSales[prod.productId._id].revenue += prod.total;
+      productSales[prod.productId._id].quantity += prod.quantity || 0;
+      productSales[prod.productId._id].revenue += prod.total || 0;
     });
   });
 
@@ -53,7 +64,8 @@ const generateSalesReportData = async (companyId, startDate, endDate) => {
 
   // Modes de paiement
   const paymentModes = sales.reduce((acc, sale) => {
-    acc[sale.paymentMode] = (acc[sale.paymentMode] || 0) + sale.totalAmount;
+    const mode = sale.paymentMode || 'Unknown';
+    acc[mode] = (acc[mode] || 0) + sale.totalAmount;
     return acc;
   }, {});
 
@@ -89,15 +101,25 @@ const generateSalesReportData = async (companyId, startDate, endDate) => {
       id: sale._id,
       date: sale.createdAt,
       totalAmount: sale.totalAmount,
-      paymentMode: sale.paymentMode,
-      status: sale.status,
-      seller: sale.userId.name,
-      products: sale.products.map(prod => ({
-        name: prod.productId.name,
-        quantity: prod.quantity,
-        unitPrice: prod.unitPrice,
-        total: prod.total
-      }))
+      paymentMode: sale.paymentMode || 'Unknown',
+      status: sale.status || 'Unknown',
+      seller: sale.userId && sale.userId.name ? sale.userId.name : 'Unknown Seller',
+      products: sale.products && Array.isArray(sale.products) ? sale.products.map(prod => {
+        if (!prod || !prod.productId) {
+          return {
+            name: 'Unknown Product',
+            quantity: 0,
+            unitPrice: 0,
+            total: 0
+          };
+        }
+        return {
+          name: prod.productId.name || 'Unknown Product',
+          quantity: prod.quantity || 0,
+          unitPrice: prod.unitPrice || 0,
+          total: prod.total || 0
+        };
+      }) : []
     }))
   };
 };
@@ -120,18 +142,28 @@ const generateProductReportData = async (companyId) => {
   // Generate a report of product stock levels and sales
   return await Promise.all(products.map(async (product) => {
     const productSales = sales.reduce((acc, sale) => {
-      const productInSale = sale.products.find(p => p.productId.toString() === product._id.toString());
+      // Vérifier si sale.products existe et est un tableau
+      if (!sale.products || !Array.isArray(sale.products)) {
+        return acc;
+      }
+      
+      const productInSale = sale.products.find(p => 
+        p && p.productId && 
+        product._id && 
+        p.productId.toString() === product._id.toString()
+      );
+      
       if (productInSale) {
-        acc.totalQuantitySold += productInSale.quantity;
-        acc.totalRevenue += productInSale.total;
+        acc.totalQuantitySold += productInSale.quantity || 0;
+        acc.totalRevenue += productInSale.total || 0;
       }
       return acc;
     }, { totalQuantitySold: 0, totalRevenue: 0 });
 
     return {
       productId: product._id,
-      productName: product.name,
-      stockLevel: product.quantity,
+      productName: product.name || 'Unknown Product',
+      stockLevel: product.quantity || 0,
       ...productSales,
       averageSellingPrice: productSales.totalQuantitySold > 0 
         ? productSales.totalRevenue / productSales.totalQuantitySold 

@@ -53,19 +53,33 @@ const swaggerOptions = {
 const swaggerSpecs = swaggerJsdoc(swaggerOptions);
 
 // Middleware CORS & JSON
+// Configuration plus permissive pour CORS
 const corsOptions = {
-  origin: '*', // Permet toutes les origines
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  origin: '*',
   credentials: true,
-  maxAge: 86400 // Cache préflight pour 24 heures
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content', 'Accept', 'Content-Type', 'Authorization'],
+  exposedHeaders: ['X-Total-Count']
 };
 
+// Middleware principal CORS
 app.use(cors(corsOptions));
-app.use(express.json());
 
-// Middleware pour les requêtes OPTIONS (préflight)
+// Middleware additionnel pour s'assurer que les en-têtes CORS sont toujours envoyés
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+// Support préflight OPTIONS sur toutes les routes
 app.options('*', cors(corsOptions));
+
+app.use(express.json());
 
 // Route spécifique pour le login
 app.post('/api/v1/login', require('./controllers/user.controller').login);

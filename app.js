@@ -53,8 +53,19 @@ const swaggerOptions = {
 const swaggerSpecs = swaggerJsdoc(swaggerOptions);
 
 // Middleware CORS & JSON
-app.use(cors());
+const corsOptions = {
+  origin: '*', // Permet toutes les origines
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  credentials: true,
+  maxAge: 86400 // Cache préflight pour 24 heures
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
+
+// Middleware pour les requêtes OPTIONS (préflight)
+app.options('*', cors(corsOptions));
 
 // Route spécifique pour le login
 app.post('/api/v1/login', require('./controllers/user.controller').login);

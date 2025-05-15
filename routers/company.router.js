@@ -7,7 +7,6 @@ const { createCompany, getAllCompanies, getCompanyById, updateCompany, deleteCom
  *   name: Companies
  *   description: Gestion des entreprises
  */
-
 /**
  * @swagger
  * /companies:

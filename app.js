@@ -10,6 +10,7 @@ const ReportRouter = require('./routers/report.router');
 const StockMouvementRouter = require('./routers/stockMouvement.router');
 const SaleRouter = require('./routers/sale.router');
 const ProductRouter = require('./routers/product.router');
+const VersionRouter = require('./routers/version.router');
 const { isLoggedIn } = require('./middleware');
 const { createCompany } = require('./controllers/company.controller');
 const { generateSalesSummaryByPhone } = require('./controllers/report.controller');
@@ -78,6 +79,11 @@ app.post('/api/v1/companies', createCompany);
 // Route POST pour le résumé des ventes par téléphone (sans authentification)
 app.post('/api/v1/sales-summary-by-phone', generateSalesSummaryByPhone);
 
+// Routes publiques pour les versions (sans authentification)
+app.get('/api/v1/versions', require('./controllers/version.controller').getAllVersions);
+app.get('/api/v1/versions/latest', require('./controllers/version.controller').getLatestVersion);
+app.get('/api/v1/versions/:id', require('./controllers/version.controller').getVersionById);
+
 // Routes protégées (avec authentification)
 app.use('/api/v1/categories', isLoggedIn, CategoryRouter);
 app.use('/api/v1/users', isLoggedIn, UserRouter);
@@ -86,5 +92,6 @@ app.use('/api/v1/reports', isLoggedIn, ReportRouter);
 app.use('/api/v1/stock-mouvements', isLoggedIn, StockMouvementRouter);
 app.use('/api/v1/sales', isLoggedIn, SaleRouter);
 app.use('/api/v1/products', isLoggedIn, ProductRouter);
+app.use('/api/v1', isLoggedIn, VersionRouter);
 
 module.exports = app;

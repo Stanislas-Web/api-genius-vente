@@ -37,7 +37,8 @@ const userSchema = new Schema({
   phone: { type: String, required: true, unique: true },
   role: { type: String, enum: ['Admin', 'Seller'], required: true },
   companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
-  lastLogin: { type: Date }
+  lastLogin: { type: Date },
+  isActived: { type: Boolean, default: true }
 }, { timestamps: true, versionKey: false });
 
 module.exports.User = model('User', userSchema);

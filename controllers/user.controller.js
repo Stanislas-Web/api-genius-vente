@@ -152,4 +152,25 @@ module.exports.deleteUser = async (req, res) => {
     }
 };
 
+module.exports.toggleActiveUser = async (req, res) => {
+    const userId = req.params.id;
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).send({ message: "Utilisateur non trouvé" });
+        }
+        user.isActived = !user.isActived;
+        await user.save();
+        return res.status(200).send({
+            message: user.isActived ? "Utilisateur réactivé avec succès" : "Utilisateur désactivé avec succès",
+            data: user,
+        });
+    } catch (error) {
+        return res.status(500).send({
+            message: "Une erreur est survenue lors du changement d'état de l'utilisateur",
+            error: error.message,
+        });
+    }
+};
+
 

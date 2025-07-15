@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { signUp, login, getAllUsers, updateUser, deleteUser, toggleUserStatus, uploadUserPhoto, getUserPhoto } = require('../controllers/user.controller');
+const { signUp, login, getAllUsers, updateUser, deleteUser, toggleUserStatus, uploadUserPhoto, getUserPhoto, toggleActiveUser } = require('../controllers/user.controller');
 const {isLoggedIn} = require('../middleware');
 
 /**
@@ -181,5 +181,37 @@ router.route('/users/:id').put(isLoggedIn,updateUser);
  */
 router.route('/users/:id').delete(isLoggedIn,deleteUser);
 
+/**
+ * @swagger
+ * /users/{id}/deactivate:
+ *   patch:
+ *     summary: Désactiver ou réactiver un utilisateur (toggle)
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de l'utilisateur à désactiver ou réactiver
+ *     responses:
+ *       200:
+ *         description: Utilisateur désactivé ou réactivé avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Utilisateur désactivé avec succès"
+ *                 data:
+ *                   $ref: '#/components/schemas/User'
+ *       404:
+ *         description: Utilisateur non trouvé
+ *       500:
+ *         description: Erreur interne du serveur
+ */
+router.route('/:id/deactivate').patch(isLoggedIn, toggleActiveUser);
 
 module.exports = router;

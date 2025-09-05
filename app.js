@@ -11,7 +11,12 @@ const StockMouvementRouter = require('./routers/stockMouvement.router');
 const SaleRouter = require('./routers/sale.router');
 const ProductRouter = require('./routers/product.router');
 const VersionRouter = require('./routers/version.router');
-const { isLoggedIn } = require('./middleware');
+const ClassroomRouter = require('./routers/classroom.router');
+const StudentRouter = require('./routers/student.router');
+const TeacherRouter = require('./routers/teacher.router');
+const SchoolFeeRouter = require('./routers/schoolFee.router');
+const PaymentRouter = require('./routers/payment.router');
+const { isLoggedIn, companyContext } = require('./middleware');
 const { createCompany } = require('./controllers/company.controller');
 const { generateSalesSummaryByPhone } = require('./controllers/report.controller');
 
@@ -31,7 +36,7 @@ const swaggerOptions = {
       },
     },
     info: {
-      title: 'Stock Management API',
+      title: 'Genius vente API',
       version: '1.0.0',
       description: 'API documentation for managing categories and other resources in the stock management system.',
     },
@@ -93,5 +98,12 @@ app.use('/api/v1/stock-mouvements', isLoggedIn, StockMouvementRouter);
 app.use('/api/v1/sales', isLoggedIn, SaleRouter);
 app.use('/api/v1/products', isLoggedIn, ProductRouter);
 app.use('/api/v1', isLoggedIn, VersionRouter);
+
+// Routes protégées avec contexte multi-tenant (système scolaire)
+app.use('/api/v1/classrooms', isLoggedIn, companyContext, ClassroomRouter);
+app.use('/api/v1/students', isLoggedIn, companyContext, StudentRouter);
+app.use('/api/v1/teachers', isLoggedIn, companyContext, TeacherRouter);
+app.use('/api/v1/school-fees', isLoggedIn, companyContext, SchoolFeeRouter);
+app.use('/api/v1/payments', isLoggedIn, companyContext, PaymentRouter);
 
 module.exports = app;

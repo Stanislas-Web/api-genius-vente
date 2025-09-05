@@ -34,7 +34,25 @@ const isLoggedIn = async (req, res, next) => {
   }
 };
 
+// MIDDLEWARE FOR COMPANY CONTEXT (MULTI-TENANT)
+const companyContext = (req, res, next) => {
+  try {
+    // Récupérer companyId depuis req.user (prioritaire) ou depuis les headers
+    const companyId = req.user?.companyId || req.headers['x-company-id'];
+    
+    if (!companyId) {
+      return res.status(400).json({ message: 'companyId manquant' });
+    }
+    
+    req.companyId = companyId;
+    next();
+  } catch (error) {
+    res.status(400).json({ message: 'Erreur lors de la récupération du contexte entreprise', error });
+  }
+};
+
 // export custom middleware
 module.exports = {
-  isLoggedIn
+  isLoggedIn,
+  companyContext
 };

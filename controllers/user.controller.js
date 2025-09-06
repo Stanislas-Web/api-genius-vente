@@ -44,6 +44,7 @@ module.exports.signUp = async (req, res) => {
                 role: result.role,
                 phone: result.phone,
                 _id: result._id,
+                companyId: result.companyId,
             },
             "RESTFULAPIs"
         );
@@ -66,7 +67,13 @@ module.exports.login = async (req, res) => {
     const phone = req.body.phone; 
 
 
-    const checkUser = await User.findOne({ phone: phone }).populate('companyId');
+    const checkUser = await User.findOne({ phone: phone }).populate({
+        path: 'companyId',
+        populate: {
+            path: 'category',
+            select: 'name nameEnglish'
+        }
+    });
 
     console.log(checkUser);
 
@@ -77,7 +84,13 @@ module.exports.login = async (req, res) => {
                 message: "User login Successfully",
                 data: checkUser,
                 token: jwt.sign(
-                    { name: checkUser.username, role: checkUser.role, phone: checkUser.phone, _id: checkUser._id },
+                    { 
+                        name: checkUser.username, 
+                        role: checkUser.role, 
+                        phone: checkUser.phone, 
+                        _id: checkUser._id,
+                        companyId: checkUser.companyId._id
+                    },
                     "RESTFULAPIs"
                 ),
             });

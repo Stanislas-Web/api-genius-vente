@@ -6,7 +6,6 @@
 - CompanyId valide
 
 ## Tests des endpoints
-
 ### 1. Créer une classe
 ```bash
 POST /api/v1/classrooms

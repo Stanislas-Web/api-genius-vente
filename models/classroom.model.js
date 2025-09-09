@@ -25,9 +25,9 @@ const mongoose = require('mongoose');
  *         level:
  *           type: string
  *           description: Niveau de la classe - ex 6ème
- *         section:
+ *         sectionId:
  *           type: string
- *           description: Section de la classe - ex Lettres
+ *           description: Référence à la section (Section) - optionnel
  *         schoolYear:
  *           type: string
  *           description: Année scolaire - ex 2025-2026
@@ -39,9 +39,9 @@ const mongoose = require('mongoose');
  *           type: boolean
  *           description: Statut actif de la classe
  *           default: true
- *         option:
+ *         optionId:
  *           type: string
- *           description: Option de la classe - ex Mathématiques, Sciences, etc
+ *           description: Référence à l'option (Option) - facultatif
  */
 const classroomSchema = new Schema({
   companyId: { 
@@ -63,8 +63,9 @@ const classroomSchema = new Schema({
   level: { 
     type: String 
   },
-  section: { 
-    type: String 
+  sectionId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Section' 
   },
   schoolYear: { 
     type: String, 
@@ -78,8 +79,9 @@ const classroomSchema = new Schema({
     type: Boolean, 
     default: true 
   },
-  option: { 
-    type: String 
+  optionId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Option' 
   }
 }, { 
   timestamps: true, 

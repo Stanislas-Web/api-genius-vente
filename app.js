@@ -16,6 +16,8 @@ const StudentRouter = require('./routers/student.router');
 const TeacherRouter = require('./routers/teacher.router');
 const SchoolFeeRouter = require('./routers/schoolFee.router');
 const PaymentRouter = require('./routers/payment.router');
+const SectionRouter = require('./routers/section.router');
+const OptionRouter = require('./routers/option.router');
 const { isLoggedIn, companyContext } = require('./middleware');
 const { createCompany } = require('./controllers/company.controller');
 const { generateSalesSummaryByPhone } = require('./controllers/report.controller');
@@ -105,5 +107,7 @@ app.use('/api/v1/students', isLoggedIn, companyContext, StudentRouter);
 app.use('/api/v1/teachers', isLoggedIn, companyContext, TeacherRouter);
 app.use('/api/v1/school-fees', isLoggedIn, companyContext, SchoolFeeRouter);
 app.use('/api/v1/payments', isLoggedIn, companyContext, PaymentRouter);
+app.use('/api/v1/sections', isLoggedIn, companyContext, SectionRouter);
+app.use('/api/v1/options', isLoggedIn, companyContext, OptionRouter);
 
 module.exports = app;

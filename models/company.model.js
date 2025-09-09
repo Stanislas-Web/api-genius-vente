@@ -9,7 +9,6 @@ const mongoose = require('mongoose');
  *       type: object
  *       required:
  *         - name
- *         - category
  *       properties:
  *         name:
  *           type: string
@@ -40,7 +39,7 @@ const companySchema = new Schema({
   signCurrency: { type: String, required: true },
   lang: { type: String, required: true },
   country: { type: String, required: true },
-  category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
+  category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
 }, { timestamps: true, versionKey: false });
 
 module.exports.Company = model('Company', companySchema);

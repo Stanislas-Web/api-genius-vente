@@ -87,8 +87,6 @@ const classroomSchema = new Schema({
   timestamps: true, 
   versionKey: false 
 });
-
 // Index pour optimiser les requêtes multi-tenant
 classroomSchema.index({ companyId: 1, schoolYear: 1, name: 1 });
-
 module.exports.Classroom = model('Classroom', classroomSchema);

@@ -3,17 +3,17 @@ const { Classroom } = require('../models/classroom.model');
 // Créer une nouvelle classe
 exports.createClassroom = async (req, res) => {
   try {
-    const { code, name, level, section, schoolYear, capacity } = req.body;
+    const { name, level, sectionId, schoolYear, capacity, optionId } = req.body;
     const companyId = req.companyId;
 
     const classroom = new Classroom({
       companyId,
-      code,
       name,
       level,
-      section,
+      sectionId,
       schoolYear,
-      capacity
+      capacity,
+      optionId
     });
 
     await classroom.save();
@@ -44,7 +44,6 @@ exports.getAllClassrooms = async (req, res) => {
     if (q) {
       filter.$or = [
         { name: { $regex: q, $options: 'i' } },
-        { code: { $regex: q, $options: 'i' } },
         { level: { $regex: q, $options: 'i' } }
       ];
     }

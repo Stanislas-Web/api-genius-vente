@@ -9,16 +9,12 @@ const mongoose = require('mongoose');
  *       type: object
  *       required:
  *         - companyId
- *         - code
  *         - name
  *         - schoolYear
  *       properties:
  *         companyId:
  *           type: string
  *           description: Référence à l'entreprise (Company)
- *         code:
- *           type: string
- *           description: Code de la classe - ex 6A-2025
  *         name:
  *           type: string
  *           description: Nom de la classe - ex 6ème A
@@ -49,12 +45,6 @@ const classroomSchema = new Schema({
     ref: 'Company', 
     required: true, 
     index: true 
-  },
-  code: { 
-    type: String, 
-    required: true, 
-    uppercase: true, 
-    trim: true 
   },
   name: { 
     type: String, 

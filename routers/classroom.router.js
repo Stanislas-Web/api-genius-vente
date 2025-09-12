@@ -29,31 +29,27 @@ const {
  *           schema:
  *             type: object
  *             required:
- *               - code
  *               - name
  *               - schoolYear
  *             properties:
- *               code:
- *                 type: string
- *                 description: Code de la classe - ex 6A-2025
  *               name:
  *                 type: string
  *                 description: Nom de la classe - ex 6ème A
  *               level:
  *                 type: string
  *                 description: Niveau de la classe - ex 6ème
- *               section:
+ *               sectionId:
  *                 type: string
- *                 description: Section de la classe - ex Lettres
+ *                 description: ID de la section (ObjectId)
  *               schoolYear:
  *                 type: string
  *                 description: Année scolaire - ex 2025-2026
  *               capacity:
  *                 type: number
  *                 description: Capacité maximale de la classe
- *               option:
+ *               optionId:
  *                 type: string
- *                 description: Option de la classe - ex Mathématiques, Sciences, etc
+ *                 description: ID de l'option (ObjectId)
  *     responses:
  *       201:
  *         description: Classe créée avec succès
@@ -155,19 +151,17 @@ router.get('/:id', getClassroomById);
  *           schema:
  *             type: object
  *             properties:
- *               code:
- *                 type: string
  *               name:
  *                 type: string
  *               level:
  *                 type: string
- *               section:
+ *               sectionId:
  *                 type: string
  *               schoolYear:
  *                 type: string
  *               capacity:
  *                 type: number
- *               option:
+ *               optionId:
  *                 type: string
  *     responses:
  *       200:

@@ -55,18 +55,15 @@ const {
  *                 type: string
  *                 format: date
  *                 description: Date de naissance
- *               parent:
+ *               tuteur:
  *                 type: object
  *                 properties:
  *                   name:
  *                     type: string
- *                     description: Nom du parent/tuteur
+ *                     description: Nom du tuteur
  *                   phone:
  *                     type: string
- *                     description: Téléphone du parent/tuteur
- *                   email:
- *                     type: string
- *                     description: Email du parent/tuteur
+ *                     description: Téléphone du tuteur
  *               classroomId:
  *                 type: string
  *                 description: ID de la classe
@@ -194,14 +191,12 @@ router.get('/:id', getStudentById);
  *               birthDate:
  *                 type: string
  *                 format: date
- *               parent:
+ *               tuteur:
  *                 type: object
  *                 properties:
  *                   name:
  *                     type: string
  *                   phone:
- *                     type: string
- *                   email:
  *                     type: string
  *               classroomId:
  *                 type: string

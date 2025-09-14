@@ -39,18 +39,15 @@ const mongoose = require('mongoose');
  *           type: string
  *           format: date
  *           description: Date de naissance de l'élève
- *         parent:
+ *         tuteur:
  *           type: object
  *           properties:
  *             name:
  *               type: string
- *               description: Nom du parent/tuteur
+ *               description: Nom du tuteur
  *             phone:
  *               type: string
- *               description: Téléphone du parent/tuteur
- *             email:
- *               type: string
- *               description: Email du parent/tuteur
+ *               description: Téléphone du tuteur
  *         classroomId:
  *           type: string
  *           description: Référence à la classe (Classroom)
@@ -95,10 +92,9 @@ const studentSchema = new Schema({
   birthDate: { 
     type: Date 
   },
-  parent: {
+  tuteur: {
     name: { type: String },
-    phone: { type: String },
-    email: { type: String }
+    phone: { type: String }
   },
   classroomId: { 
     type: mongoose.Schema.Types.ObjectId, 

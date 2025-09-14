@@ -18,10 +18,18 @@ exports.createStudent = async (req, res) => {
       firstName, 
       gender, 
       birthDate, 
-      parent, 
+      tuteur, 
+      parent, // Ancien format - à rejeter
       classroomId, 
       schoolYear 
     } = req.body;
+
+    // Rejeter l'ancien format "parent"
+    if (parent) {
+      return res.status(400).json({ 
+        message: 'Le champ "parent" n\'est plus supporté. Utilisez "tuteur" à la place.' 
+      });
+    }
 
     // Vérifier que la classe appartient à la même entreprise
     const classroom = await Classroom.findOne({ 
@@ -50,7 +58,7 @@ exports.createStudent = async (req, res) => {
       firstName,
       gender,
       birthDate,
-      parent,
+      tuteur,
       classroomId,
       schoolYear: finalSchoolYear
     });

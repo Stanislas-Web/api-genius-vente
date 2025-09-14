@@ -138,3 +138,23 @@ exports.toggleClassroomActive = async (req, res) => {
     res.status(500).json({ message: 'Erreur lors du changement de statut', error });
   }
 };
+
+// Supprimer une classe
+exports.deleteClassroom = async (req, res) => {
+  try {
+    const companyId = req.companyId;
+    const classroom = await Classroom.findOneAndDelete({ 
+      _id: req.params.id, 
+      companyId 
+    });
+
+    if (!classroom) {
+      return res.status(404).json({ message: 'Classe non trouvée' });
+    }
+
+    res.status(200).json({ message: 'Classe supprimée avec succès' });
+  } catch (error) {
+    console.error('Error deleting classroom:', error);
+    res.status(500).json({ message: 'Erreur lors de la suppression de la classe', error });
+  }
+};

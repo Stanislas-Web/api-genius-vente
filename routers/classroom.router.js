@@ -4,7 +4,8 @@ const {
   getAllClassrooms, 
   getClassroomById, 
   updateClassroom, 
-  toggleClassroomActive 
+  toggleClassroomActive,
+  deleteClassroom 
 } = require('../controllers/classroom.controller');
 
 /**
@@ -197,5 +198,30 @@ router.put('/:id', updateClassroom);
  *         description: Erreur serveur
  */
 router.patch('/:id/active', toggleClassroomActive);
+
+/**
+ * @swagger
+ * /classrooms/{id}:
+ *   delete:
+ *     summary: Supprimer une classe
+ *     tags: [Classrooms]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID de la classe à supprimer
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Classe supprimée avec succès
+ *       404:
+ *         description: Classe non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
+router.delete('/:id', deleteClassroom);
 
 module.exports = router;

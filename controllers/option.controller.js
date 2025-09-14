@@ -4,10 +4,12 @@ const { Option } = require('../models/option.model');
 exports.createOption = async (req, res) => {
   try {
     const companyId = req.companyId;
-    const { name } = req.body;
+    const { name, code, sectionId } = req.body;
 
     const option = new Option({
       name,
+      code,
+      sectionId,
       companyId
     });
 

@@ -7,7 +7,6 @@ exports.createSchoolFee = async (req, res) => {
     const companyId = req.companyId;
     const { 
       label, 
-      code, 
       periodicity, 
       schoolYear, 
       currency, 
@@ -33,7 +32,6 @@ exports.createSchoolFee = async (req, res) => {
     const schoolFee = new SchoolFee({
       companyId,
       label,
-      code,
       periodicity,
       schoolYear,
       currency,

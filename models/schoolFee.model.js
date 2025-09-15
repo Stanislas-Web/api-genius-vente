@@ -10,7 +10,6 @@ const mongoose = require('mongoose');
  *       required:
  *         - companyId
  *         - label
- *         - code
  *         - schoolYear
  *       properties:
  *         companyId:
@@ -19,9 +18,6 @@ const mongoose = require('mongoose');
  *         label:
  *           type: string
  *           description: Libellé du frais - ex Minerval Mensuel
- *         code:
- *           type: string
- *           description: Code du frais - ex MIN
  *         periodicity:
  *           type: string
  *           enum: [unique, mensuel, trimestriel]
@@ -69,11 +65,6 @@ const schoolFeeSchema = new Schema({
     type: String, 
     required: true 
   },
-  code: { 
-    type: String, 
-    required: true, 
-    uppercase: true 
-  },
   periodicity: { 
     type: String, 
     enum: ['unique', 'mensuel', 'trimestriel'], 
@@ -117,6 +108,6 @@ const schoolFeeSchema = new Schema({
 });
 
 // Index pour optimiser les requêtes multi-tenant
-schoolFeeSchema.index({ companyId: 1, schoolYear: 1, code: 1 });
+schoolFeeSchema.index({ companyId: 1, schoolYear: 1 });
 
 module.exports.SchoolFee = model('SchoolFee', schoolFeeSchema);

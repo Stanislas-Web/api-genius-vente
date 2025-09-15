@@ -30,15 +30,11 @@ const {
  *             type: object
  *             required:
  *               - label
- *               - code
  *               - schoolYear
  *             properties:
  *               label:
  *                 type: string
  *                 description: Libellé du frais - ex Minerval Mensuel
- *               code:
- *                 type: string
- *                 description: Code du frais - ex MIN
  *               periodicity:
  *                 type: string
  *                 enum: [unique, mensuel, trimestriel]
@@ -172,8 +168,6 @@ router.get('/:id', getSchoolFeeById);
  *             type: object
  *             properties:
  *               label:
- *                 type: string
- *               code:
  *                 type: string
  *               periodicity:
  *                 type: string

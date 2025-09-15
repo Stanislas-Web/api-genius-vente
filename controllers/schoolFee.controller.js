@@ -14,19 +14,26 @@ exports.createSchoolFee = async (req, res) => {
       fixedAmount, 
       min, 
       max, 
-      classroomId 
+      classroomIds 
     } = req.body;
 
-    // Vérifier que la classe appartient à la même entreprise si fournie
-    if (classroomId) {
-      const classroom = await Classroom.findOne({ 
-        _id: classroomId, 
-        companyId 
+    // Validation des classroomIds
+    if (!classroomIds || !Array.isArray(classroomIds) || classroomIds.length === 0) {
+      return res.status(400).json({ 
+        message: 'classroomIds est requis et doit être un tableau non vide' 
       });
-      
-      if (!classroom) {
-        return res.status(400).json({ message: 'Classe non trouvée ou ne vous appartient pas' });
-      }
+    }
+
+    // Vérifier que toutes les classes appartiennent à la même entreprise
+    const classrooms = await Classroom.find({ 
+      _id: { $in: classroomIds }, 
+      companyId 
+    });
+    
+    if (classrooms.length !== classroomIds.length) {
+      return res.status(400).json({ 
+        message: 'Une ou plusieurs classes non trouvées ou ne vous appartiennent pas' 
+      });
     }
 
     const schoolFee = new SchoolFee({
@@ -39,15 +46,13 @@ exports.createSchoolFee = async (req, res) => {
       fixedAmount,
       min,
       max,
-      classroomId
+      classroomIds
     });
 
     await schoolFee.save();
     
-    // Populate la classe si fournie
-    if (classroomId) {
-      await schoolFee.populate('classroomId', 'name code schoolYear');
-    }
+    // Populate les classes
+    await schoolFee.populate('classroomIds', 'name code schoolYear');
     
     res.status(201).json({ message: 'Frais scolaire créé avec succès', schoolFee });
   } catch (error) {
@@ -74,18 +79,15 @@ exports.getAllSchoolFees = async (req, res) => {
     if (schoolYear) filter.schoolYear = schoolYear;
     if (active !== undefined) filter.active = active === 'true';
     
-    // Pour classroomId, inclure les frais globaux (sans classroomId) et ceux spécifiques à la classe
+    // Pour classroomId, inclure les frais qui concernent cette classe
     if (classroomId) {
-      filter.$or = [
-        { classroomId: null }, // Frais globaux
-        { classroomId: classroomId } // Frais spécifiques à la classe
-      ];
+      filter.classroomIds = classroomId;
     }
 
     const skip = (page - 1) * limit;
     
     const schoolFees = await SchoolFee.find(filter)
-      .populate('classroomId', 'name code schoolYear')
+      .populate('classroomIds', 'name code schoolYear')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -114,7 +116,7 @@ exports.getSchoolFeeById = async (req, res) => {
     const schoolFee = await SchoolFee.findOne({ 
       _id: req.params.id, 
       companyId 
-    }).populate('classroomId', 'name code schoolYear');
+    }).populate('classroomIds', 'name code schoolYear');
 
     if (!schoolFee) {
       return res.status(404).json({ message: 'Frais scolaire non trouvé' });
@@ -131,17 +133,19 @@ exports.getSchoolFeeById = async (req, res) => {
 exports.updateSchoolFee = async (req, res) => {
   try {
     const companyId = req.companyId;
-    const { classroomId } = req.body;
+    const { classroomIds } = req.body;
 
-    // Vérifier que la classe appartient à la même entreprise si fournie
-    if (classroomId) {
-      const classroom = await Classroom.findOne({ 
-        _id: classroomId, 
+    // Vérifier que toutes les classes appartiennent à la même entreprise si fournies
+    if (classroomIds && Array.isArray(classroomIds) && classroomIds.length > 0) {
+      const classrooms = await Classroom.find({ 
+        _id: { $in: classroomIds }, 
         companyId 
       });
       
-      if (!classroom) {
-        return res.status(400).json({ message: 'Classe non trouvée ou ne vous appartient pas' });
+      if (classrooms.length !== classroomIds.length) {
+        return res.status(400).json({ 
+          message: 'Une ou plusieurs classes non trouvées ou ne vous appartiennent pas' 
+        });
       }
     }
 
@@ -149,7 +153,7 @@ exports.updateSchoolFee = async (req, res) => {
       { _id: req.params.id, companyId },
       req.body,
       { new: true }
-    ).populate('classroomId', 'name code schoolYear');
+    ).populate('classroomIds', 'name code schoolYear');
 
     if (!schoolFee) {
       return res.status(404).json({ message: 'Frais scolaire non trouvé' });

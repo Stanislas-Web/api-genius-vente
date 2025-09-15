@@ -11,6 +11,7 @@ const mongoose = require('mongoose');
  *         - companyId
  *         - label
  *         - schoolYear
+ *         - classroomIds
  *       properties:
  *         companyId:
  *           type: string
@@ -46,9 +47,11 @@ const mongoose = require('mongoose');
  *           type: number
  *           description: Montant maximum autorisé
  *           default: 0
- *         classroomId:
- *           type: string
- *           description: Référence à la classe pour override spécifique
+ *         classroomIds:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: Références aux classes concernées par ce frais
  *         active:
  *           type: boolean
  *           description: Statut actif du frais
@@ -94,10 +97,11 @@ const schoolFeeSchema = new Schema({
     type: Number, 
     default: 0 
   },
-  classroomId: { 
+  classroomIds: [{ 
     type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Classroom' 
-  },
+    ref: 'Classroom',
+    required: true
+  }],
   active: { 
     type: Boolean, 
     default: true 
@@ -109,5 +113,6 @@ const schoolFeeSchema = new Schema({
 
 // Index pour optimiser les requêtes multi-tenant
 schoolFeeSchema.index({ companyId: 1, schoolYear: 1 });
+schoolFeeSchema.index({ classroomIds: 1 });
 
 module.exports.SchoolFee = model('SchoolFee', schoolFeeSchema);

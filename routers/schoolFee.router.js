@@ -31,6 +31,7 @@ const {
  *             required:
  *               - label
  *               - schoolYear
+ *               - classroomIds
  *             properties:
  *               label:
  *                 type: string
@@ -63,9 +64,11 @@ const {
  *                 type: number
  *                 description: Montant maximum autorisé
  *                 default: 0
- *               classroomId:
- *                 type: string
- *                 description: ID de la classe pour override spécifique
+ *               classroomIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: IDs des classes concernées par ce frais
  *     responses:
  *       201:
  *         description: Frais scolaire créé avec succès
@@ -184,8 +187,10 @@ router.get('/:id', getSchoolFeeById);
  *                 type: number
  *               max:
  *                 type: number
- *               classroomId:
- *                 type: string
+ *               classroomIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
  *               active:
  *                 type: boolean
  *     responses:

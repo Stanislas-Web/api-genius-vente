@@ -581,6 +581,13 @@ exports.getRecentPayments = async (req, res) => {
       acc[payment.paymentMethod] = (acc[payment.paymentMethod] || 0) + 1;
       return acc;
     }, {});
+    
+    // Calculer les montants par devise
+    const amountsByCurrency = payments.reduce((acc, payment) => {
+      const currency = payment.schoolFeeId?.currency || 'CDF';
+      acc[currency] = (acc[currency] || 0) + payment.amount;
+      return acc;
+    }, {});
 
     res.status(200).json({
       payments,
@@ -589,7 +596,8 @@ exports.getRecentPayments = async (req, res) => {
         recentPaymentsCount: payments.length,
         totalAmountCollected: totalAmount,
         averageAmount: payments.length > 0 ? Math.round(totalAmount / payments.length) : 0,
-        paymentMethodsBreakdown: paymentMethods
+        paymentMethodsBreakdown: paymentMethods,
+        amountsByCurrency: amountsByCurrency
       },
       pagination: {
         page: parseInt(page),

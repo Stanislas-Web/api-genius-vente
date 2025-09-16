@@ -64,3 +64,5 @@ async function fixOptionIndexes() {
 // Attendre un peu plus longtemps avant d'exécuter
 setTimeout(fixOptionIndexes, 3000);
 
+
+

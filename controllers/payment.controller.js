@@ -45,20 +45,48 @@ exports.createPayment = async (req, res) => {
     });
     
     const totalPaid = existingPayments.reduce((sum, payment) => sum + payment.amount, 0);
-    const remainingAmount = schoolFee.fixedAmount - totalPaid;
-
-    // Vérifier si le montant du paiement ne dépasse pas le montant restant
-    if (amount > remainingAmount) {
-      return res.status(400).json({ 
-        message: `Montant trop élevé. Montant restant à payer: ${remainingAmount} ${schoolFee.currency}` 
-      });
+    
+    // Validation selon le type de frais scolaire
+    if (schoolFee.allowCustomAmount) {
+      // Pour les frais à montant personnalisé, vérifier les limites min/max
+      if (schoolFee.min > 0 && amount < schoolFee.min) {
+        return res.status(400).json({ 
+          message: `Montant trop faible. Montant minimum requis: ${schoolFee.min} ${schoolFee.currency}` 
+        });
+      }
+      
+      if (schoolFee.max > 0 && amount > schoolFee.max) {
+        return res.status(400).json({ 
+          message: `Montant trop élevé. Montant maximum autorisé: ${schoolFee.max} ${schoolFee.currency}` 
+        });
+      }
+    } else {
+      // Pour les frais à montant fixe, vérifier le montant restant
+      const remainingAmount = schoolFee.fixedAmount - totalPaid;
+      
+      if (schoolFee.fixedAmount <= 0) {
+        return res.status(400).json({ 
+          message: `Ce frais scolaire n'a pas de montant fixe défini. Veuillez configurer le montant ou utiliser un frais à montant personnalisé.` 
+        });
+      }
+      
+      if (amount > remainingAmount) {
+        return res.status(400).json({ 
+          message: `Montant trop élevé. Montant restant à payer: ${remainingAmount} ${schoolFee.currency}` 
+        });
+      }
     }
 
     // Déterminer le statut du paiement
     let paymentStatus = 'completed';
-    if (amount < remainingAmount) {
-      paymentStatus = 'partial';
+    if (!schoolFee.allowCustomAmount) {
+      // Pour les frais à montant fixe, vérifier si c'est un paiement partiel
+      const remainingAmount = schoolFee.fixedAmount - totalPaid;
+      if (amount < remainingAmount) {
+        paymentStatus = 'partial';
+      }
     }
+    // Pour les frais à montant personnalisé, on considère toujours comme 'completed'
 
     const payment = new Payment({
       companyId,
@@ -81,14 +109,26 @@ exports.createPayment = async (req, res) => {
       { path: 'schoolFeeId', select: 'label code amount currency' }
     ]);
 
+    // Calculer le résumé du paiement
+    const newTotalPaid = totalPaid + amount;
+    let paymentSummary = {
+      totalPaid: newTotalPaid,
+      isFullyPaid: false
+    };
+    
+    if (!schoolFee.allowCustomAmount) {
+      const remainingAmount = schoolFee.fixedAmount - newTotalPaid;
+      paymentSummary.remainingAmount = remainingAmount;
+      paymentSummary.isFullyPaid = newTotalPaid >= schoolFee.fixedAmount;
+    } else {
+      // Pour les frais à montant personnalisé, pas de notion de "montant restant"
+      paymentSummary.isFullyPaid = true; // Chaque paiement est considéré comme complet
+    }
+
     res.status(201).json({ 
       message: 'Paiement enregistré avec succès', 
       payment,
-      paymentSummary: {
-        totalPaid: totalPaid + amount,
-        remainingAmount: remainingAmount - amount,
-        isFullyPaid: (totalPaid + amount) >= schoolFee.fixedAmount
-      }
+      paymentSummary
     });
   } catch (error) {
     console.error('Error creating payment:', error);

@@ -81,6 +81,7 @@ exports.getAllSchoolFees = async (req, res) => {
     const skip = (page - 1) * limit;
     
     const schoolFees = await SchoolFee.find(filter)
+      .select('label periodicity schoolYear currency amount classroomIds active createdAt updatedAt')
       .populate('classroomIds', 'name code schoolYear')
       .sort({ createdAt: -1 })
       .skip(skip)

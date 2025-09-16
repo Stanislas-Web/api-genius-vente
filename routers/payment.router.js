@@ -5,7 +5,9 @@ const {
   getStudentPaymentStatus,
   getClassroomPayments,
   getFullyPaidStudents,
-  getStudentsPaidAboveAmount 
+  getStudentsPaidAboveAmount,
+  getPaidStudentsByClassroom,
+  getRecentPayments
 } = require('../controllers/payment.controller');
 
 /**
@@ -336,6 +338,261 @@ router.get('/status/:studentId/:schoolFeeId', getStudentPaymentStatus);
  *         description: Erreur serveur
  */
 router.get('/classroom/:classroomId/:schoolFeeId', getClassroomPayments);
+
+/**
+ * @swagger
+ * /payments/paid-students/{classroomId}/{schoolFeeId}:
+ *   get:
+ *     summary: Récupérer tous les élèves qui ont payé un frais spécifique dans une classe
+ *     tags: [Payments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: classroomId
+ *         required: true
+ *         description: ID de la classe
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: schoolFeeId
+ *         required: true
+ *         description: ID du frais scolaire
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Numéro de page
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Nombre d'éléments par page
+ *     responses:
+ *       200:
+ *         description: Liste des élèves ayant payé récupérée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 classroom:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                     code:
+ *                       type: string
+ *                     level:
+ *                       type: string
+ *                     section:
+ *                       type: string
+ *                     option:
+ *                       type: string
+ *                 schoolFee:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     label:
+ *                       type: string
+ *                     fixedAmount:
+ *                       type: number
+ *                     currency:
+ *                       type: string
+ *                     allowCustomAmount:
+ *                       type: boolean
+ *                 paidStudents:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       matricule:
+ *                         type: string
+ *                       lastName:
+ *                         type: string
+ *                       firstName:
+ *                         type: string
+ *                       middleName:
+ *                         type: string
+ *                       paymentInfo:
+ *                         type: object
+ *                         properties:
+ *                           totalPaid:
+ *                             type: number
+ *                           paymentCount:
+ *                             type: integer
+ *                           isFullyPaid:
+ *                             type: boolean
+ *                           lastPaymentDate:
+ *                             type: string
+ *                             format: date
+ *                           firstPaymentDate:
+ *                             type: string
+ *                             format: date
+ *                       payments:
+ *                         type: array
+ *                         items:
+ *                           $ref: '#/components/schemas/Payment'
+ *                 summary:
+ *                   type: object
+ *                   properties:
+ *                     totalStudentsInClass:
+ *                       type: integer
+ *                     paidStudentsCount:
+ *                       type: integer
+ *                     unpaidStudentsCount:
+ *                       type: integer
+ *                     fullyPaidCount:
+ *                       type: integer
+ *                     totalAmountCollected:
+ *                       type: number
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     pages:
+ *                       type: integer
+ *       404:
+ *         description: Classe ou frais scolaire non trouvé
+ *       500:
+ *         description: Erreur serveur
+ */
+router.get('/paid-students/:classroomId/:schoolFeeId', getPaidStudentsByClassroom);
+
+/**
+ * @swagger
+ * /payments/recent:
+ *   get:
+ *     summary: Récupérer les paiements les plus récents
+ *     tags: [Payments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: "Nombre de paiements à récupérer (défaut: 10)"
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Numéro de page
+ *     responses:
+ *       200:
+ *         description: Paiements récents récupérés avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 payments:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       amount:
+ *                         type: number
+ *                       paymentDate:
+ *                         type: string
+ *                         format: date
+ *                       paymentMethod:
+ *                         type: string
+ *                         enum: [cash, bank_transfer, mobile_money, check]
+ *                       status:
+ *                         type: string
+ *                         enum: [completed, partial, pending]
+ *                       reference:
+ *                         type: string
+ *                       notes:
+ *                         type: string
+ *                       studentId:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                           matricule:
+ *                             type: string
+ *                           lastName:
+ *                             type: string
+ *                           firstName:
+ *                             type: string
+ *                           classroomId:
+ *                             type: object
+ *                       schoolFeeId:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                           label:
+ *                             type: string
+ *                           currency:
+ *                             type: string
+ *                           fixedAmount:
+ *                             type: number
+ *                           allowCustomAmount:
+ *                             type: boolean
+ *                       recordedBy:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                           username:
+ *                             type: string
+ *                       createdAt:
+ *                         type: string
+ *                         format: date
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date
+ *                 summary:
+ *                   type: object
+ *                   properties:
+ *                     totalPayments:
+ *                       type: integer
+ *                     recentPaymentsCount:
+ *                       type: integer
+ *                     totalAmountCollected:
+ *                       type: number
+ *                     averageAmount:
+ *                       type: number
+ *                     paymentMethodsBreakdown:
+ *                       type: object
+ *                       additionalProperties:
+ *                         type: integer
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     pages:
+ *                       type: integer
+ *       500:
+ *         description: Erreur serveur
+ */
+router.get('/recent', getRecentPayments);
 
 /**
  * @swagger

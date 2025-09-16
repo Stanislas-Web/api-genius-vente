@@ -474,6 +474,166 @@ exports.getFullyPaidStudents = async (req, res) => {
   }
 };
 
+// Récupérer tous les élèves qui ont payé un frais spécifique dans une classe
+exports.getPaidStudentsByClassroom = async (req, res) => {
+  try {
+    const companyId = req.companyId;
+    const { classroomId, schoolFeeId } = req.params;
+    const { 
+      page = 1, 
+      limit = 20 
+    } = req.query;
+
+    // Vérifier que la classe et le frais appartiennent à la même entreprise
+    const [classroom, schoolFee] = await Promise.all([
+      Classroom.findOne({ _id: classroomId, companyId }),
+      SchoolFee.findOne({ _id: schoolFeeId, companyId })
+    ]);
+    
+    if (!classroom) {
+      return res.status(404).json({ message: 'Classe non trouvée ou ne vous appartient pas' });
+    }
+    
+    if (!schoolFee) {
+      return res.status(404).json({ message: 'Frais scolaire non trouvé ou ne vous appartient pas' });
+    }
+
+    // Récupérer tous les élèves de la classe
+    const students = await Student.find({ 
+      companyId, 
+      classroomId 
+    }).select('_id matricule lastName firstName middleName');
+
+    // Récupérer tous les paiements pour ce frais dans cette classe
+    const studentIds = students.map(student => student._id);
+    const payments = await Payment.find({ 
+      companyId, 
+      studentId: { $in: studentIds }, 
+      schoolFeeId 
+    }).sort({ paymentDate: -1 });
+
+    // Filtrer seulement les élèves qui ont payé (au moins un paiement)
+    const paidStudents = students.filter(student => {
+      return payments.some(payment => 
+        payment.studentId.toString() === student._id.toString()
+      );
+    }).map(student => {
+      const studentPayments = payments.filter(payment => 
+        payment.studentId.toString() === student._id.toString()
+      );
+      
+      const totalPaid = studentPayments.reduce((sum, payment) => sum + payment.amount, 0);
+      const isFullyPaid = !schoolFee.allowCustomAmount ? 
+        totalPaid >= schoolFee.fixedAmount : 
+        true; // Pour les frais personnalisés, on considère qu'ils ont payé
+      
+      return {
+        ...student.toObject(),
+        paymentInfo: {
+          totalPaid,
+          paymentCount: studentPayments.length,
+          isFullyPaid,
+          lastPaymentDate: studentPayments.length > 0 ? 
+            studentPayments[0].paymentDate : null,
+          firstPaymentDate: studentPayments.length > 0 ? 
+            studentPayments[studentPayments.length - 1].paymentDate : null
+        },
+        payments: studentPayments
+      };
+    }).sort((a, b) => b.paymentInfo.totalPaid - a.paymentInfo.totalPaid); // Trier par montant payé décroissant
+
+    // Pagination
+    const skip = (page - 1) * limit;
+    const paginatedStudents = paidStudents.slice(skip, skip + parseInt(limit));
+
+    res.status(200).json({
+      classroom: {
+        _id: classroom._id,
+        name: classroom.name,
+        code: classroom.code,
+        level: classroom.level,
+        section: classroom.section,
+        option: classroom.option
+      },
+      schoolFee: {
+        _id: schoolFee._id,
+        label: schoolFee.label,
+        fixedAmount: schoolFee.fixedAmount,
+        currency: schoolFee.currency,
+        allowCustomAmount: schoolFee.allowCustomAmount
+      },
+      paidStudents: paginatedStudents,
+      summary: {
+        totalStudentsInClass: students.length,
+        paidStudentsCount: paidStudents.length,
+        unpaidStudentsCount: students.length - paidStudents.length,
+        fullyPaidCount: paidStudents.filter(s => s.paymentInfo.isFullyPaid).length,
+        totalAmountCollected: paidStudents.reduce((sum, s) => sum + s.paymentInfo.totalPaid, 0)
+      },
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: paidStudents.length,
+        pages: Math.ceil(paidStudents.length / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching paid students by classroom:', error);
+    res.status(500).json({ message: 'Erreur lors de la récupération des élèves ayant payé', error });
+  }
+};
+
+// Récupérer les paiements les plus récents
+exports.getRecentPayments = async (req, res) => {
+  try {
+    const companyId = req.companyId;
+    const { 
+      limit = 10,
+      page = 1
+    } = req.query;
+
+    const skip = (page - 1) * limit;
+    
+    // Récupérer les paiements les plus récents
+    const payments = await Payment.find({ companyId })
+      .populate('studentId', 'matricule lastName firstName classroomId')
+      .populate('schoolFeeId', 'label currency fixedAmount allowCustomAmount')
+      .populate('recordedBy', 'username')
+      .sort({ paymentDate: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await Payment.countDocuments({ companyId });
+
+    // Calculer les statistiques
+    const totalAmount = payments.reduce((sum, payment) => sum + payment.amount, 0);
+    const paymentMethods = payments.reduce((acc, payment) => {
+      acc[payment.paymentMethod] = (acc[payment.paymentMethod] || 0) + 1;
+      return acc;
+    }, {});
+
+    res.status(200).json({
+      payments,
+      summary: {
+        totalPayments: total,
+        recentPaymentsCount: payments.length,
+        totalAmountCollected: totalAmount,
+        averageAmount: payments.length > 0 ? Math.round(totalAmount / payments.length) : 0,
+        paymentMethodsBreakdown: paymentMethods
+      },
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching recent payments:', error);
+    res.status(500).json({ message: 'Erreur lors de la récupération des paiements récents', error });
+  }
+};
+
 // Récupérer les élèves ayant payé plus qu'un montant sélectionné
 exports.getStudentsPaidAboveAmount = async (req, res) => {
   try {

@@ -31,22 +31,10 @@ const mongoose = require('mongoose');
  *           type: string
  *           description: Devise du frais
  *           default: CDF
- *         allowCustomAmount:
- *           type: boolean
- *           description: Autoriser un montant personnalisé
- *           default: false
- *         fixedAmount:
+ *         amount:
  *           type: number
- *           description: Montant fixe du frais
- *           default: 0
- *         min:
- *           type: number
- *           description: Montant minimum autorisé
- *           default: 0
- *         max:
- *           type: number
- *           description: Montant maximum autorisé
- *           default: 0
+ *           description: Montant fixe du frais scolaire
+ *           required: true
  *         classroomIds:
  *           type: array
  *           items:
@@ -81,21 +69,9 @@ const schoolFeeSchema = new Schema({
     type: String, 
     default: 'CDF' 
   },
-  allowCustomAmount: { 
-    type: Boolean, 
-    default: false 
-  },
-  fixedAmount: { 
+  amount: { 
     type: Number, 
-    default: 0 
-  },
-  min: { 
-    type: Number, 
-    default: 0 
-  },
-  max: { 
-    type: Number, 
-    default: 0 
+    required: true 
   },
   classroomIds: [{ 
     type: mongoose.Schema.Types.ObjectId, 

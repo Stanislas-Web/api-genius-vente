@@ -10,10 +10,7 @@ exports.createSchoolFee = async (req, res) => {
       periodicity, 
       schoolYear, 
       currency, 
-      allowCustomAmount, 
-      fixedAmount, 
-      min, 
-      max, 
+      amount, 
       classroomIds 
     } = req.body;
 
@@ -42,10 +39,7 @@ exports.createSchoolFee = async (req, res) => {
       periodicity,
       schoolYear,
       currency,
-      allowCustomAmount,
-      fixedAmount,
-      min,
-      max,
+      amount,
       classroomIds
     });
 

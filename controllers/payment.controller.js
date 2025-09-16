@@ -46,47 +46,26 @@ exports.createPayment = async (req, res) => {
     
     const totalPaid = existingPayments.reduce((sum, payment) => sum + payment.amount, 0);
     
-    // Validation selon le type de frais scolaire
-    if (schoolFee.allowCustomAmount) {
-      // Pour les frais à montant personnalisé, vérifier les limites min/max
-      if (schoolFee.min > 0 && amount < schoolFee.min) {
-        return res.status(400).json({ 
-          message: `Montant trop faible. Montant minimum requis: ${schoolFee.min} ${schoolFee.currency}` 
-        });
-      }
-      
-      if (schoolFee.max > 0 && amount > schoolFee.max) {
-        return res.status(400).json({ 
-          message: `Montant trop élevé. Montant maximum autorisé: ${schoolFee.max} ${schoolFee.currency}` 
-        });
-      }
-    } else {
-      // Pour les frais à montant fixe, vérifier le montant restant
-      const remainingAmount = schoolFee.fixedAmount - totalPaid;
-      
-      if (schoolFee.fixedAmount <= 0) {
-        return res.status(400).json({ 
-          message: `Ce frais scolaire n'a pas de montant fixe défini. Veuillez configurer le montant ou utiliser un frais à montant personnalisé.` 
-        });
-      }
-      
-      if (amount > remainingAmount) {
-        return res.status(400).json({ 
-          message: `Montant trop élevé. Montant restant à payer: ${remainingAmount} ${schoolFee.currency}` 
-        });
-      }
+    // Vérifier le montant restant à payer
+    const remainingAmount = schoolFee.amount - totalPaid;
+    
+    if (schoolFee.amount <= 0) {
+      return res.status(400).json({ 
+        message: `Ce frais scolaire n'a pas de montant défini.` 
+      });
+    }
+    
+    if (amount > remainingAmount) {
+      return res.status(400).json({ 
+        message: `Montant trop élevé. Montant restant à payer: ${remainingAmount} ${schoolFee.currency}` 
+      });
     }
 
     // Déterminer le statut du paiement
     let paymentStatus = 'completed';
-    if (!schoolFee.allowCustomAmount) {
-      // Pour les frais à montant fixe, vérifier si c'est un paiement partiel
-      const remainingAmount = schoolFee.fixedAmount - totalPaid;
-      if (amount < remainingAmount) {
-        paymentStatus = 'partial';
-      }
+    if (amount < remainingAmount) {
+      paymentStatus = 'partial';
     }
-    // Pour les frais à montant personnalisé, on considère toujours comme 'completed'
 
     const payment = new Payment({
       companyId,
@@ -111,19 +90,13 @@ exports.createPayment = async (req, res) => {
 
     // Calculer le résumé du paiement
     const newTotalPaid = totalPaid + amount;
-    let paymentSummary = {
-      totalPaid: newTotalPaid,
-      isFullyPaid: false
-    };
+    const newRemainingAmount = schoolFee.amount - newTotalPaid;
     
-    if (!schoolFee.allowCustomAmount) {
-      const remainingAmount = schoolFee.fixedAmount - newTotalPaid;
-      paymentSummary.remainingAmount = remainingAmount;
-      paymentSummary.isFullyPaid = newTotalPaid >= schoolFee.fixedAmount;
-    } else {
-      // Pour les frais à montant personnalisé, pas de notion de "montant restant"
-      paymentSummary.isFullyPaid = true; // Chaque paiement est considéré comme complet
-    }
+    const paymentSummary = {
+      totalPaid: newTotalPaid,
+      remainingAmount: newRemainingAmount,
+      isFullyPaid: newTotalPaid >= schoolFee.amount
+    };
 
     res.status(201).json({ 
       message: 'Paiement enregistré avec succès', 
@@ -172,7 +145,7 @@ exports.getStudentPayments = async (req, res) => {
     const skip = (page - 1) * limit;
     
     const payments = await Payment.find(filter)
-      .populate('schoolFeeId', 'label code fixedAmount currency periodicity')
+      .populate('schoolFeeId', 'label amount currency periodicity')
       .sort({ paymentDate: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -228,8 +201,8 @@ exports.getStudentPaymentStatus = async (req, res) => {
     }).sort({ paymentDate: 1 });
 
     const totalPaid = payments.reduce((sum, payment) => sum + payment.amount, 0);
-    const remainingAmount = schoolFee.fixedAmount - totalPaid;
-    const isFullyPaid = totalPaid >= schoolFee.fixedAmount;
+    const remainingAmount = schoolFee.amount - totalPaid;
+    const isFullyPaid = totalPaid >= schoolFee.amount;
     const paymentStatus = isFullyPaid ? 'completed' : (totalPaid > 0 ? 'partial' : 'pending');
 
     res.status(200).json({
@@ -243,7 +216,7 @@ exports.getStudentPaymentStatus = async (req, res) => {
         _id: schoolFee._id,
         label: schoolFee.label,
         code: schoolFee.code,
-        fixedAmount: schoolFee.fixedAmount,
+        amount: schoolFee.amount,
         currency: schoolFee.currency,
         periodicity: schoolFee.periodicity
       },
@@ -252,7 +225,7 @@ exports.getStudentPaymentStatus = async (req, res) => {
         totalPaid,
         remainingAmount,
         isFullyPaid,
-        progressPercentage: Math.round((totalPaid / schoolFee.fixedAmount) * 100)
+        progressPercentage: Math.round((totalPaid / schoolFee.amount) * 100)
       },
       payments
     });
@@ -308,8 +281,8 @@ exports.getClassroomPayments = async (req, res) => {
       );
       
       const totalPaid = studentPayments.reduce((sum, payment) => sum + payment.amount, 0);
-      const remainingAmount = schoolFee.fixedAmount - totalPaid;
-      const isFullyPaid = totalPaid >= schoolFee.fixedAmount;
+      const remainingAmount = schoolFee.amount - totalPaid;
+      const isFullyPaid = totalPaid >= schoolFee.amount;
       const paymentStatus = isFullyPaid ? 'completed' : (totalPaid > 0 ? 'partial' : 'pending');
 
       return {
@@ -319,7 +292,7 @@ exports.getClassroomPayments = async (req, res) => {
           totalPaid,
           remainingAmount,
           isFullyPaid,
-          progressPercentage: Math.round((totalPaid / schoolFee.fixedAmount) * 100)
+          progressPercentage: Math.round((totalPaid / schoolFee.amount) * 100)
         },
         payments: studentPayments
       };
@@ -350,7 +323,7 @@ exports.getClassroomPayments = async (req, res) => {
         _id: schoolFee._id,
         label: schoolFee.label,
         code: schoolFee.code,
-        fixedAmount: schoolFee.fixedAmount,
+        amount: schoolFee.amount,
         currency: schoolFee.currency
       },
       students: paginatedStudents,
@@ -420,7 +393,7 @@ exports.getFullyPaidStudents = async (req, res) => {
       );
       
       const totalPaid = studentPayments.reduce((sum, payment) => sum + payment.amount, 0);
-      return totalPaid >= schoolFee.fixedAmount;
+      return totalPaid >= schoolFee.amount;
     }).map(student => {
       const studentPayments = payments.filter(payment => 
         payment.studentId.toString() === student._id.toString()
@@ -432,8 +405,8 @@ exports.getFullyPaidStudents = async (req, res) => {
         ...student.toObject(),
         paymentInfo: {
           totalPaid,
-          requiredAmount: schoolFee.fixedAmount,
-          excessAmount: totalPaid - schoolFee.fixedAmount,
+          requiredAmount: schoolFee.amount,
+          excessAmount: totalPaid - schoolFee.amount,
           paymentCount: studentPayments.length,
           lastPaymentDate: studentPayments.length > 0 ? 
             Math.max(...studentPayments.map(p => new Date(p.paymentDate))) : null
@@ -450,7 +423,7 @@ exports.getFullyPaidStudents = async (req, res) => {
         _id: schoolFee._id,
         label: schoolFee.label,
         code: schoolFee.code,
-        fixedAmount: schoolFee.fixedAmount,
+        amount: schoolFee.amount,
         currency: schoolFee.currency,
         periodicity: schoolFee.periodicity
       },
@@ -523,9 +496,7 @@ exports.getPaidStudentsByClassroom = async (req, res) => {
       );
       
       const totalPaid = studentPayments.reduce((sum, payment) => sum + payment.amount, 0);
-      const isFullyPaid = !schoolFee.allowCustomAmount ? 
-        totalPaid >= schoolFee.fixedAmount : 
-        true; // Pour les frais personnalisés, on considère qu'ils ont payé
+      const isFullyPaid = totalPaid >= schoolFee.amount;
       
       return {
         ...student.toObject(),
@@ -558,9 +529,8 @@ exports.getPaidStudentsByClassroom = async (req, res) => {
       schoolFee: {
         _id: schoolFee._id,
         label: schoolFee.label,
-        fixedAmount: schoolFee.fixedAmount,
+        amount: schoolFee.amount,
         currency: schoolFee.currency,
-        allowCustomAmount: schoolFee.allowCustomAmount
       },
       paidStudents: paginatedStudents,
       summary: {
@@ -597,7 +567,7 @@ exports.getRecentPayments = async (req, res) => {
     // Récupérer les paiements les plus récents
     const payments = await Payment.find({ companyId })
       .populate('studentId', 'matricule lastName firstName classroomId')
-      .populate('schoolFeeId', 'label currency fixedAmount allowCustomAmount')
+      .populate('schoolFeeId', 'label currency amount')
       .populate('recordedBy', 'username')
       .sort({ paymentDate: -1, createdAt: -1 })
       .skip(skip)
@@ -696,15 +666,15 @@ exports.getStudentsPaidAboveAmount = async (req, res) => {
       );
       
       const totalPaid = studentPayments.reduce((sum, payment) => sum + payment.amount, 0);
-      const isFullyPaid = totalPaid >= schoolFee.fixedAmount;
+      const isFullyPaid = totalPaid >= schoolFee.amount;
       
       return {
         ...student.toObject(),
         paymentInfo: {
           totalPaid,
-          requiredAmount: schoolFee.fixedAmount,
+          requiredAmount: schoolFee.amount,
           minAmountRequested: minAmountNum,
-          excessAmount: totalPaid - schoolFee.fixedAmount,
+          excessAmount: totalPaid - schoolFee.amount,
           amountAboveMinimum: totalPaid - minAmountNum,
           paymentCount: studentPayments.length,
           isFullyPaid,
@@ -723,7 +693,7 @@ exports.getStudentsPaidAboveAmount = async (req, res) => {
         _id: schoolFee._id,
         label: schoolFee.label,
         code: schoolFee.code,
-        fixedAmount: schoolFee.fixedAmount,
+        amount: schoolFee.amount,
         currency: schoolFee.currency,
         periodicity: schoolFee.periodicity
       },

@@ -86,7 +86,6 @@ const schoolFeeSchema = new Schema({
   timestamps: true, 
   versionKey: false 
 });
-
 // Index pour optimiser les requêtes multi-tenant
 schoolFeeSchema.index({ companyId: 1, schoolYear: 1 });
 schoolFeeSchema.index({ classroomIds: 1 });

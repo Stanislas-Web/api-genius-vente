@@ -89,5 +89,4 @@ const schoolFeeSchema = new Schema({
 // Index pour optimiser les requêtes multi-tenant
 schoolFeeSchema.index({ companyId: 1, schoolYear: 1 });
 schoolFeeSchema.index({ classroomIds: 1 });
-
 module.exports.SchoolFee = model('SchoolFee', schoolFeeSchema);

@@ -329,9 +329,12 @@ exports.getClassroomPayments = async (req, res) => {
       students: paginatedStudents,
       summary: {
         totalStudents: studentsWithPaymentStatus.length,
+        studentsWithPayments: studentsWithPaymentStatus.filter(s => s.paymentStatus.totalPaid > 0).length,
+        studentsWithoutPayments: studentsWithPaymentStatus.filter(s => s.paymentStatus.totalPaid === 0).length,
         completedPayments: studentsWithPaymentStatus.filter(s => s.paymentStatus.status === 'completed').length,
         partialPayments: studentsWithPaymentStatus.filter(s => s.paymentStatus.status === 'partial').length,
-        pendingPayments: studentsWithPaymentStatus.filter(s => s.paymentStatus.status === 'pending').length
+        pendingPayments: studentsWithPaymentStatus.filter(s => s.paymentStatus.status === 'pending').length,
+        totalAmountCollected: studentsWithPaymentStatus.reduce((sum, s) => sum + s.paymentStatus.totalPaid, 0)
       },
       pagination: {
         page: parseInt(page),
@@ -609,6 +612,213 @@ exports.getRecentPayments = async (req, res) => {
   } catch (error) {
     console.error('Error fetching recent payments:', error);
     res.status(500).json({ message: 'Erreur lors de la récupération des paiements récents', error });
+  }
+};
+
+// Récupérer les statistiques globales de l'entreprise
+exports.getGlobalStatistics = async (req, res) => {
+  try {
+    const companyId = req.companyId;
+    const { period = 'current' } = req.query; // current, lastMonth, lastYear
+
+    // Calculer les dates selon la période
+    let startDate, endDate;
+    const now = new Date();
+    
+    switch (period) {
+      case 'lastMonth':
+        startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+        break;
+      case 'lastYear':
+        startDate = new Date(now.getFullYear() - 1, 0, 1);
+        endDate = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59);
+        break;
+      case 'current':
+      default:
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+        break;
+    }
+
+    // 1. Statistiques des élèves
+    const totalStudents = await Student.countDocuments({ companyId });
+    
+    // 2. Statistiques des classes
+    const totalClassrooms = await Classroom.countDocuments({ companyId });
+    
+    // 3. Statistiques des paiements du mois
+    const monthlyPayments = await Payment.find({
+      companyId,
+      paymentDate: { $gte: startDate, $lte: endDate }
+    }).populate('schoolFeeId', 'label amount currency');
+
+    const totalMonthlyAmount = monthlyPayments.reduce((sum, payment) => sum + payment.amount, 0);
+    const monthlyPaymentsCount = monthlyPayments.length;
+
+    // Calculer les montants par devise pour le mois
+    const monthlyAmountsByCurrency = monthlyPayments.reduce((acc, payment) => {
+      const currency = payment.schoolFeeId?.currency || 'CDF';
+      acc[currency] = (acc[currency] || 0) + payment.amount;
+      return acc;
+    }, {});
+
+    // 4. Calculer le taux de paiement global
+    // Récupérer tous les frais scolaires actifs
+    const activeSchoolFees = await SchoolFee.find({ 
+      companyId, 
+      active: true 
+    });
+
+    // Récupérer tous les élèves
+    const allStudents = await Student.find({ companyId });
+    const studentIds = allStudents.map(student => student._id);
+
+    // Récupérer tous les paiements
+    const allPayments = await Payment.find({ 
+      companyId,
+      studentId: { $in: studentIds }
+    });
+
+    // Calculer le taux de paiement par frais scolaire
+    let totalRequiredAmount = 0;
+    let totalPaidAmount = 0;
+    let totalStudentsWithPayments = 0;
+    let totalStudentsWithoutPayments = 0;
+
+    const schoolFeeStats = await Promise.all(activeSchoolFees.map(async (schoolFee) => {
+      // Récupérer les élèves de ce frais (basé sur les classes)
+      const studentsInFee = await Student.find({
+        companyId,
+        classroomId: { $in: schoolFee.classroomIds }
+      });
+
+      const studentsInFeeIds = studentsInFee.map(student => student._id);
+      
+      // Récupérer les paiements pour ce frais
+      const feePayments = allPayments.filter(payment => 
+        payment.schoolFeeId.toString() === schoolFee._id.toString() &&
+        studentsInFeeIds.includes(payment.studentId)
+      );
+
+      // Calculer les statistiques pour ce frais
+      const studentsWithPayments = new Set(feePayments.map(p => p.studentId.toString()));
+      const studentsWithoutPayments = studentsInFee.length - studentsWithPayments.size;
+      
+      const totalPaidForFee = feePayments.reduce((sum, payment) => sum + payment.amount, 0);
+      const totalRequiredForFee = schoolFee.amount * studentsInFee.length;
+      
+      const paymentRate = studentsInFee.length > 0 ? 
+        Math.round((studentsWithPayments.size / studentsInFee.length) * 100) : 0;
+
+      totalRequiredAmount += totalRequiredForFee;
+      totalPaidAmount += totalPaidForFee;
+      totalStudentsWithPayments += studentsWithPayments.size;
+      totalStudentsWithoutPayments += studentsWithoutPayments;
+
+      return {
+        schoolFeeId: schoolFee._id,
+        label: schoolFee.label,
+        amount: schoolFee.amount,
+        currency: schoolFee.currency,
+        totalStudents: studentsInFee.length,
+        studentsWithPayments: studentsWithPayments.size,
+        studentsWithoutPayments,
+        totalPaid: totalPaidForFee,
+        totalRequired: totalRequiredForFee,
+        paymentRate
+      };
+    }));
+
+    // Calculer le taux de paiement global
+    const globalPaymentRate = totalStudents > 0 ? 
+      Math.round((totalStudentsWithPayments / totalStudents) * 100) : 0;
+
+    // 5. Statistiques des méthodes de paiement du mois
+    const paymentMethodsStats = monthlyPayments.reduce((acc, payment) => {
+      acc[payment.paymentMethod] = (acc[payment.paymentMethod] || 0) + 1;
+      return acc;
+    }, {});
+
+    // 6. Statistiques par classe
+    const classroomStats = await Promise.all(
+      (await Classroom.find({ companyId })).map(async (classroom) => {
+        const studentsInClass = await Student.countDocuments({
+          companyId,
+          classroomId: classroom._id
+        });
+
+        const classPayments = monthlyPayments.filter(payment => 
+          payment.studentId && 
+          payment.studentId.classroomId && 
+          payment.studentId.classroomId.toString() === classroom._id.toString()
+        );
+
+        const classAmount = classPayments.reduce((sum, payment) => sum + payment.amount, 0);
+
+        return {
+          classroomId: classroom._id,
+          name: classroom.name,
+          code: classroom.code,
+          level: classroom.level,
+          totalStudents: studentsInClass,
+          monthlyPayments: classPayments.length,
+          monthlyAmount: classAmount
+        };
+      })
+    );
+
+    res.status(200).json({
+      period: {
+        type: period,
+        startDate,
+        endDate,
+        label: period === 'current' ? 'Mois en cours' : 
+               period === 'lastMonth' ? 'Mois dernier' : 'Année dernière'
+      },
+      statistics: {
+        // Totaux généraux
+        totalStudents,
+        totalClassrooms,
+        totalActiveSchoolFees: activeSchoolFees.length,
+        
+        // Paiements du mois
+        monthlyPayments: {
+          count: monthlyPaymentsCount,
+          totalAmount: totalMonthlyAmount,
+          amountsByCurrency: monthlyAmountsByCurrency,
+          averageAmount: monthlyPaymentsCount > 0 ? 
+            Math.round(totalMonthlyAmount / monthlyPaymentsCount) : 0
+        },
+        
+        // Taux de paiement
+        paymentRate: {
+          global: globalPaymentRate,
+          totalStudentsWithPayments,
+          totalStudentsWithoutPayments,
+          totalRequiredAmount,
+          totalPaidAmount,
+          completionPercentage: totalRequiredAmount > 0 ? 
+            Math.round((totalPaidAmount / totalRequiredAmount) * 100) : 0
+        },
+        
+        // Méthodes de paiement
+        paymentMethods: paymentMethodsStats,
+        
+        // Détails par frais scolaire
+        schoolFeesBreakdown: schoolFeeStats,
+        
+        // Détails par classe
+        classroomsBreakdown: classroomStats
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching global statistics:', error);
+    res.status(500).json({ 
+      message: 'Erreur lors de la récupération des statistiques globales', 
+      error: error.message 
+    });
   }
 };
 

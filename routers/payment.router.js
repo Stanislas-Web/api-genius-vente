@@ -7,7 +7,8 @@ const {
   getFullyPaidStudents,
   getStudentsPaidAboveAmount,
   getPaidStudentsByClassroom,
-  getRecentPayments
+  getRecentPayments,
+  getGlobalStatistics
 } = require('../controllers/payment.controller');
 
 /**
@@ -868,5 +869,142 @@ router.get('/fully-paid/:schoolFeeId', getFullyPaidStudents);
  *         description: Erreur serveur
  */
 router.get('/above-amount/:schoolFeeId', getStudentsPaidAboveAmount);
+
+/**
+ * @swagger
+ * /payments/statistics:
+ *   get:
+ *     summary: Récupérer les statistiques globales de l'entreprise
+ *     tags: [Payments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: period
+ *         schema:
+ *           type: string
+ *           enum: [current, lastMonth, lastYear]
+ *           default: current
+ *         description: Période pour les statistiques
+ *     responses:
+ *       200:
+ *         description: Statistiques globales récupérées avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 period:
+ *                   type: object
+ *                   properties:
+ *                     type:
+ *                       type: string
+ *                     startDate:
+ *                       type: string
+ *                       format: date-time
+ *                     endDate:
+ *                       type: string
+ *                       format: date-time
+ *                     label:
+ *                       type: string
+ *                 statistics:
+ *                   type: object
+ *                   properties:
+ *                     totalStudents:
+ *                       type: integer
+ *                       description: Nombre total d'élèves
+ *                     totalClassrooms:
+ *                       type: integer
+ *                       description: Nombre total de classes
+ *                     totalActiveSchoolFees:
+ *                       type: integer
+ *                       description: Nombre de frais scolaires actifs
+ *                     monthlyPayments:
+ *                       type: object
+ *                       properties:
+ *                         count:
+ *                           type: integer
+ *                           description: Nombre de paiements du mois
+ *                         totalAmount:
+ *                           type: number
+ *                           description: Montant total des paiements du mois
+ *                         amountsByCurrency:
+ *                           type: object
+ *                           description: Montants par devise
+ *                         averageAmount:
+ *                           type: number
+ *                           description: Montant moyen des paiements
+ *                     paymentRate:
+ *                       type: object
+ *                       properties:
+ *                         global:
+ *                           type: integer
+ *                           description: Taux de paiement global (%)
+ *                         totalStudentsWithPayments:
+ *                           type: integer
+ *                           description: Nombre d'élèves ayant payé
+ *                         totalStudentsWithoutPayments:
+ *                           type: integer
+ *                           description: Nombre d'élèves sans paiement
+ *                         totalRequiredAmount:
+ *                           type: number
+ *                           description: Montant total requis
+ *                         totalPaidAmount:
+ *                           type: number
+ *                           description: Montant total payé
+ *                         completionPercentage:
+ *                           type: integer
+ *                           description: Pourcentage de completion
+ *                     paymentMethods:
+ *                       type: object
+ *                       description: Répartition par méthode de paiement
+ *                     schoolFeesBreakdown:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           schoolFeeId:
+ *                             type: string
+ *                           label:
+ *                             type: string
+ *                           amount:
+ *                             type: number
+ *                           currency:
+ *                             type: string
+ *                           totalStudents:
+ *                             type: integer
+ *                           studentsWithPayments:
+ *                             type: integer
+ *                           studentsWithoutPayments:
+ *                             type: integer
+ *                           totalPaid:
+ *                             type: number
+ *                           totalRequired:
+ *                             type: number
+ *                           paymentRate:
+ *                             type: integer
+ *                     classroomsBreakdown:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           classroomId:
+ *                             type: string
+ *                           name:
+ *                             type: string
+ *                           code:
+ *                             type: string
+ *                           level:
+ *                             type: string
+ *                           totalStudents:
+ *                             type: integer
+ *                           monthlyPayments:
+ *                             type: integer
+ *                           monthlyAmount:
+ *                             type: number
+ *       500:
+ *         description: Erreur serveur
+ */
+router.get('/statistics', getGlobalStatistics);
 
 module.exports = router;

@@ -2,6 +2,44 @@ const { Payment } = require('../models/payment.model');
 const { Student } = require('../models/student.model');
 const { SchoolFee } = require('../models/schoolFee.model');
 const { Classroom } = require('../models/classroom.model');
+const axios = require('axios');
+
+// Fonction pour envoyer un SMS de confirmation de paiement
+const sendPaymentConfirmationSMS = async (studentName, amount, currency, phone) => {
+  if (!phone) {
+    console.log('Aucun numéro de téléphone fourni pour l\'envoi du SMS');
+    return;
+  }
+
+  const url = 'https://nmlygy.api.infobip.com/sms/2/text/advanced';
+  
+  const headers = {
+    'Authorization': 'App d5819848b9e86ee925a9ec584c4d1d91-9ed8758c-2081-4ac2-9192-b2d136e782dd',
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
+
+  const message = `Confirmation de paiement: ${studentName} a payé ${amount} ${currency}. Merci pour votre confiance.`;
+  
+  const body = {
+    messages: [
+      {
+        destinations: [{ to: phone }],
+        from: '447491163443',
+        text: message,
+      },
+    ],
+  };
+
+  try {
+    const response = await axios.post(url, body, { headers });
+    console.log('SMS de confirmation envoyé avec succès:', response.data);
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error("Erreur lors de l'envoi du SMS de confirmation:", error.response?.data || error.message);
+    return { success: false, error: error.response?.data || error.message };
+  }
+};
 
 // Enregistrer un paiement
 exports.createPayment = async (req, res) => {
@@ -17,11 +55,11 @@ exports.createPayment = async (req, res) => {
       notes 
     } = req.body;
 
-    // Vérifier que l'élève appartient à la même entreprise
+    // Vérifier que l'élève appartient à la même entreprise et récupérer les infos du tuteur
     const student = await Student.findOne({ 
       _id: studentId, 
       companyId 
-    });
+    }).select('matricule lastName firstName tuteur');
     
     if (!student) {
       return res.status(400).json({ message: 'Élève non trouvé ou ne vous appartient pas' });
@@ -98,10 +136,24 @@ exports.createPayment = async (req, res) => {
       isFullyPaid: newTotalPaid >= schoolFee.amount
     };
 
+    // Envoyer un SMS de confirmation au tuteur si un numéro de téléphone est disponible
+    let smsResult = null;
+    if (student.tuteur && student.tuteur.phone) {
+      const studentFullName = `${student.firstName} ${student.lastName}`;
+      smsResult = await sendPaymentConfirmationSMS(
+        studentFullName,
+        amount,
+        schoolFee.currency,
+        student.tuteur.phone
+      );
+    }
+
     res.status(201).json({ 
       message: 'Paiement enregistré avec succès', 
       payment,
-      paymentSummary
+      paymentSummary,
+      smsSent: smsResult ? smsResult.success : false,
+      smsDetails: smsResult
     });
   } catch (error) {
     console.error('Error creating payment:', error);

@@ -8,7 +8,8 @@ const {
   getStudentsPaidAboveAmount,
   getPaidStudentsByClassroom,
   getRecentPayments,
-  getGlobalStatistics
+  getGlobalStatistics,
+  getUnpaidStudents
 } = require('../controllers/payment.controller');
 
 /**
@@ -869,6 +870,148 @@ router.get('/fully-paid/:schoolFeeId', getFullyPaidStudents);
  *         description: Erreur serveur
  */
 router.get('/above-amount/:schoolFeeId', getStudentsPaidAboveAmount);
+
+/**
+ * @swagger
+ * /payments/unpaid/{schoolFeeId}:
+ *   get:
+ *     summary: Récupérer les élèves qui n'ont pas payé un frais spécifique
+ *     tags: [Payments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: schoolFeeId
+ *         required: true
+ *         description: ID du frais scolaire
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Numéro de page
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Nombre d'éléments par page
+ *       - in: query
+ *         name: classroomId
+ *         schema:
+ *           type: string
+ *         description: Filtrer par classe spécifique
+ *     responses:
+ *       200:
+ *         description: Liste des élèves non payés récupérée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 schoolFee:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     label:
+ *                       type: string
+ *                     code:
+ *                       type: string
+ *                     amount:
+ *                       type: number
+ *                     currency:
+ *                       type: string
+ *                     periodicity:
+ *                       type: string
+ *                 filterCriteria:
+ *                   type: object
+ *                   properties:
+ *                     classroomId:
+ *                       type: string
+ *                 students:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       matricule:
+ *                         type: string
+ *                       lastName:
+ *                         type: string
+ *                       firstName:
+ *                         type: string
+ *                       middleName:
+ *                         type: string
+ *                       classroomId:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                           name:
+ *                             type: string
+ *                           code:
+ *                             type: string
+ *                           level:
+ *                             type: string
+ *                           section:
+ *                             type: string
+ *                           option:
+ *                             type: string
+ *                       paymentInfo:
+ *                         type: object
+ *                         properties:
+ *                           totalPaid:
+ *                             type: number
+ *                           requiredAmount:
+ *                             type: number
+ *                           remainingAmount:
+ *                             type: number
+ *                           paymentCount:
+ *                             type: integer
+ *                           isFullyPaid:
+ *                             type: boolean
+ *                           paymentStatus:
+ *                             type: string
+ *                             enum: [pending, partial, completed]
+ *                           progressPercentage:
+ *                             type: integer
+ *                           lastPaymentDate:
+ *                             type: string
+ *                             format: date
+ *                 summary:
+ *                   type: object
+ *                   properties:
+ *                     totalStudents:
+ *                       type: integer
+ *                     unpaidStudents:
+ *                       type: integer
+ *                     fullyPaidStudents:
+ *                       type: integer
+ *                     totalUnpaidAmount:
+ *                       type: number
+ *                     averageUnpaidAmount:
+ *                       type: number
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     pages:
+ *                       type: integer
+ *       404:
+ *         description: Frais scolaire non trouvé
+ *       500:
+ *         description: Erreur serveur
+ */
+router.get('/unpaid/:schoolFeeId', getUnpaidStudents);
 
 /**
  * @swagger

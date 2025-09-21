@@ -991,3 +991,115 @@ exports.getStudentsPaidAboveAmount = async (req, res) => {
     res.status(500).json({ message: 'Erreur lors de la récupération des élèves ayant payé plus que le montant sélectionné', error });
   }
 };
+
+// Récupérer les élèves qui n'ont pas payé un frais spécifique
+exports.getUnpaidStudents = async (req, res) => {
+  try {
+    const companyId = req.companyId;
+    const { schoolFeeId } = req.params;
+    const { 
+      page = 1, 
+      limit = 20, 
+      classroomId 
+    } = req.query;
+
+    // Vérifier que le frais scolaire appartient à la même entreprise
+    const schoolFee = await SchoolFee.findOne({ 
+      _id: schoolFeeId, 
+      companyId 
+    });
+    
+    if (!schoolFee) {
+      return res.status(404).json({ message: 'Frais scolaire non trouvé ou ne vous appartient pas' });
+    }
+
+    // Construction du filtre pour les élèves
+    const studentFilter = { companyId };
+    if (classroomId) {
+      studentFilter.classroomId = classroomId;
+    }
+
+    // Récupérer tous les élèves selon le filtre
+    const students = await Student.find(studentFilter)
+      .populate('classroomId', 'name code level section option')
+      .select('_id matricule lastName firstName middleName classroomId');
+
+    // Récupérer tous les paiements pour ce frais
+    const studentIds = students.map(student => student._id);
+    const payments = await Payment.find({ 
+      companyId, 
+      studentId: { $in: studentIds }, 
+      schoolFeeId 
+    });
+
+    // Filtrer les élèves qui n'ont pas payé (aucun paiement ou paiement insuffisant)
+    const unpaidStudents = students.filter(student => {
+      const studentPayments = payments.filter(payment => 
+        payment.studentId.toString() === student._id.toString()
+      );
+      
+      const totalPaid = studentPayments.reduce((sum, payment) => sum + payment.amount, 0);
+      return totalPaid < schoolFee.amount; // N'a pas payé le montant complet
+    }).map(student => {
+      const studentPayments = payments.filter(payment => 
+        payment.studentId.toString() === student._id.toString()
+      );
+      
+      const totalPaid = studentPayments.reduce((sum, payment) => sum + payment.amount, 0);
+      const remainingAmount = schoolFee.amount - totalPaid;
+      const isFullyPaid = totalPaid >= schoolFee.amount;
+      const paymentStatus = isFullyPaid ? 'completed' : (totalPaid > 0 ? 'partial' : 'pending');
+
+      return {
+        ...student.toObject(),
+        paymentInfo: {
+          totalPaid,
+          requiredAmount: schoolFee.amount,
+          remainingAmount,
+          paymentCount: studentPayments.length,
+          isFullyPaid,
+          paymentStatus,
+          progressPercentage: Math.round((totalPaid / schoolFee.amount) * 100),
+          lastPaymentDate: studentPayments.length > 0 ? 
+            Math.max(...studentPayments.map(p => new Date(p.paymentDate))) : null
+        }
+      };
+    }).sort((a, b) => a.paymentInfo.remainingAmount - b.paymentInfo.remainingAmount); // Trier par montant restant croissant
+
+    // Pagination
+    const skip = (page - 1) * limit;
+    const paginatedStudents = unpaidStudents.slice(skip, skip + parseInt(limit));
+
+    res.status(200).json({
+      schoolFee: {
+        _id: schoolFee._id,
+        label: schoolFee.label,
+        code: schoolFee.code,
+        amount: schoolFee.amount,
+        currency: schoolFee.currency,
+        periodicity: schoolFee.periodicity
+      },
+      filterCriteria: {
+        classroomId: classroomId || 'all'
+      },
+      students: paginatedStudents,
+      summary: {
+        totalStudents: students.length,
+        unpaidStudents: unpaidStudents.length,
+        fullyPaidStudents: students.length - unpaidStudents.length,
+        totalUnpaidAmount: unpaidStudents.reduce((sum, s) => sum + s.paymentInfo.remainingAmount, 0),
+        averageUnpaidAmount: unpaidStudents.length > 0 ? 
+          Math.round(unpaidStudents.reduce((sum, s) => sum + s.paymentInfo.remainingAmount, 0) / unpaidStudents.length) : 0
+      },
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: unpaidStudents.length,
+        pages: Math.ceil(unpaidStudents.length / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching unpaid students:', error);
+    res.status(500).json({ message: 'Erreur lors de la récupération des élèves non payés', error });
+  }
+};

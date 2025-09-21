@@ -6,9 +6,11 @@ async function testPaymentSMS() {
 
   // Données de test
   const testData = {
-    studentName: 'Jean KABONGO',
-    amount: 50000,
-    currency: 'CDF',
+    studentName: 'Jean-Paul Makengo',
+    amount: 50,
+    currency: 'USD',
+    classroom: '3ème B',
+    paymentDate: '22/09/2025',
     phone: '+243826016607' // Numéro fourni par l'utilisateur
   };
 
@@ -20,7 +22,9 @@ async function testPaymentSMS() {
     'Accept': 'application/json',
   };
 
-  const message = `Confirmation de paiement: ${testData.studentName} a payé ${testData.amount} ${testData.currency}. Merci pour votre confiance.`;
+  const message = `École Saint-Augustin
+Cher parent, nous confirmons la réception du paiement de ${testData.amount} ${testData.currency} pour ${testData.studentName}, en classe de ${testData.classroom}, le ${testData.paymentDate}.
+Merci pour votre confiance.`;
   
   const body = {
     messages: [

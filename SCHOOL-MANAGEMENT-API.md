@@ -6,8 +6,53 @@ Cette API permet de gérer l'ensemble des aspects liés à la gestion d'un étab
 
 ## 🔐 Authentification
 
-Tous les endpoints nécessitent un token d'authentification (sauf mention contraire) dans le header :
+### Se connecter (Login)
+```http
+POST /api/v1/auth/login
 ```
+**Corps de la requête :**
+```json
+{
+  "email": "admin@ecole.com",
+  "password": "votre_mot_de_passe"
+}
+```
+
+**Réponse en cas de succès (200 OK) :**
+```json
+{
+  "success": true,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "5f8d0f4d7f4f4a2f3c4d5e6f",
+    "name": "Admin User",
+    "email": "admin@ecole.com",
+    "role": "admin"
+  }
+}
+```
+
+### Utilisation du token
+Tous les endpoints (sauf `/auth/login` et `/reports/sales-summary-by-phone`) nécessitent un token d'authentification dans le header :
+```
+Authorization: Bearer <votre_token>
+```
+
+### Rafraîchir le token
+```http
+POST /api/v1/auth/refresh-token
+Authorization: Bearer <votre_refresh_token>
+```
+
+### Se déconnecter (Logout)
+```http
+POST /api/v1/auth/logout
+Authorization: Bearer <votre_token>
+```
+
+### Récupérer le profil utilisateur
+```http
+GET /api/v1/auth/me
 Authorization: Bearer <votre_token>
 ```
 

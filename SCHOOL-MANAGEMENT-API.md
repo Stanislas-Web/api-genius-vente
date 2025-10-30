@@ -4,6 +4,11 @@
 
 Cette API permet de gérer l'ensemble des aspects liés à la gestion d'un établissement scolaire, y compris les classes, les étudiants, les enseignants, les frais scolaires et les paiements.
 
+### 🔗 URL de Base
+```
+http://24.199.107.106:8000/
+```
+
 ## 🔐 Authentification
 
 ### Se connecter (Login)

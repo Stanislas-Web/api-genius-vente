@@ -13,13 +13,13 @@ http://24.199.107.106:8000/
 
 ### Se connecter (Login)
 ```http
-POST /api/v1/auth/login
+POST /api/v1/login
 ```
 **Corps de la requête :**
 ```json
 {
-  "email": "admin@ecole.com",
-  "password": "votre_mot_de_passe"
+  "phone": "numéro_de_téléphone",
+  "password": "mot_de_passe"
 }
 ```
 

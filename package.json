@@ -15,7 +15,7 @@
     "pm2:status": "pm2 status"
   },
   "engines": {
-    "node": "t22.x"
+    "node": ">=18.x"
   },
   "keywords": [],
   "author": "",

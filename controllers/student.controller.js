@@ -299,3 +299,34 @@ exports.getStudentsByClassroom = async (req, res) => {
     res.status(500).json({ message: 'Erreur lors de la récupération des élèves de la classe', error });
   }
 };
+
+// Supprimer un élève
+exports.deleteStudent = async (req, res) => {
+  try {
+    const companyId = req.companyId;
+    const { id } = req.params;
+
+    // Vérifier que l'élève appartient à la même entreprise
+    const student = await Student.findOne({ _id: id, companyId });
+    
+    if (!student) {
+      return res.status(404).json({ message: 'Élève non trouvé ou ne vous appartient pas' });
+    }
+
+    // Supprimer l'élève
+    await Student.findByIdAndDelete(id);
+
+    res.status(200).json({ 
+      message: 'Élève supprimé avec succès',
+      deletedStudent: {
+        _id: student._id,
+        matricule: student.matricule,
+        firstName: student.firstName,
+        lastName: student.lastName
+      }
+    });
+  } catch (error) {
+    console.error('Error deleting student:', error);
+    res.status(500).json({ message: 'Erreur lors de la suppression de l\'élève', error });
+  }
+};

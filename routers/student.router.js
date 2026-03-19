@@ -4,6 +4,7 @@ const {
   getAllStudents, 
   getStudentById, 
   updateStudent, 
+  deleteStudent,
   moveStudent,
   getStudentsByClassroom 
 } = require('../controllers/student.controller');
@@ -214,6 +215,31 @@ router.get('/:id', getStudentById);
  *         description: Erreur serveur
  */
 router.put('/:id', updateStudent);
+
+/**
+ * @swagger
+ * /students/{id}:
+ *   delete:
+ *     summary: Supprimer un élève
+ *     tags: [Students]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID de l'élève à supprimer
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Élève supprimé avec succès
+ *       404:
+ *         description: Élève non trouvé
+ *       500:
+ *         description: Erreur serveur
+ */
+router.delete('/:id', deleteStudent);
 
 /**
  * @swagger

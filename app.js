@@ -19,6 +19,7 @@ const PaymentRouter = require('./routers/payment.router');
 const SectionRouter = require('./routers/section.router');
 const OptionRouter = require('./routers/option.router');
 const DashboardRouter = require('./routers/dashboard.router');
+const CommunicationRouter = require('./routers/communication.router');
 const RoomTypeRouter = require('./routers/roomType.router');
 const RoomRouter = require('./routers/room.router');
 const BookingRouter = require('./routers/booking.router');
@@ -115,6 +116,7 @@ app.use('/api/v1/payments', isLoggedIn, companyContext, PaymentRouter);
 app.use('/api/v1/sections', isLoggedIn, companyContext, SectionRouter);
 app.use('/api/v1/options', isLoggedIn, companyContext, OptionRouter);
 app.use('/api/v1/dashboard', isLoggedIn, companyContext, DashboardRouter);
+app.use('/api/v1/communication', isLoggedIn, companyContext, CommunicationRouter);
 
 // Routes protégées avec contexte multi-tenant (système hôtel)
 app.use('/api/v1/room-types', isLoggedIn, companyContext, RoomTypeRouter);

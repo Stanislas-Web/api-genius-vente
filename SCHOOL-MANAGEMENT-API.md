@@ -36,11 +36,12 @@ Authorization: Bearer <votre_token>
 6. [Paiements (Payments)](#paiements-payments)
 7. [Filtres et Recherches Avancées](#filtres-et-recherches-avancées)
 8. [Dashboard](#dashboard)
-9. [Sections](#sections)
-10. [Options](#options)
-11. [Exemples de Flux Complets](#exemples-de-flux-complets)
-12. [Codes d'Erreur](#codes-derreur)
-13. [Notes Importantes](#notes-importantes)
+9. [Communication avec les Parents](#communication-avec-les-parents)
+10. [Sections](#sections)
+11. [Options](#options)
+12. [Exemples de Flux Complets](#exemples-de-flux-complets)
+13. [Codes d'Erreur](#codes-derreur)
+14. [Notes Importantes](#notes-importantes)
 
 ---
 
@@ -2035,7 +2036,297 @@ const fetchDashboard = async () => {
 
 ---
 
-## �� Sections
+## 📱 Communication avec les Parents
+
+Cette section permet d'envoyer des messages SMS aux parents/tuteurs des élèves selon 3 niveaux : individuel, par classe, ou toute l'école.
+
+### 1. Envoyer un message au parent d'un élève
+
+**POST** `/communication/student/:studentId` 🔒
+
+**Description:** Envoie un SMS personnalisé au parent/tuteur d'un élève spécifique.
+
+**Body:**
+```json
+{
+  "message": "Votre enfant a obtenu d'excellents résultats ce trimestre. Félicitations !",
+  "scheduledTime": "2026-03-20T10:00:00Z"
+}
+```
+
+**Champs:**
+- `message` (requis): Contenu du message à envoyer
+- `scheduledTime` (optionnel): Heure programmée pour l'envoi (fonctionnalité future)
+
+**Exemple:**
+```bash
+POST /api/v1/communication/student/69bc6ddc0bf196c9697b6d97
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "message": "Réunion parents-professeurs le 25 mars à 14h. Votre présence est importante."
+}
+```
+
+**Réponse (200):**
+```json
+{
+  "message": "Message envoyé avec succès au parent",
+  "recipient": {
+    "studentName": "jojo Mana",
+    "matricule": "ELV-457302",
+    "parentName": "Marie Mana",
+    "parentPhone": "+243826016607",
+    "classroom": "6ème Année Test"
+  },
+  "smsResult": {
+    "messages": [
+      {
+        "messageId": "123456789",
+        "status": {
+          "groupId": 1,
+          "groupName": "PENDING",
+          "id": 26,
+          "name": "PENDING_ACCEPTED"
+        }
+      }
+    ]
+  }
+}
+```
+
+**Réponse (400) - Pas de numéro de téléphone:**
+```json
+{
+  "message": "Aucun numéro de téléphone de tuteur associé à cet élève",
+  "student": {
+    "firstName": "Jean",
+    "lastName": "Dupont",
+    "matricule": "ELV-2026-001"
+  }
+}
+```
+
+**Format du SMS envoyé:**
+```
+Bonjour Marie Mana,
+
+Concernant jojo Mana (6ème Année Test):
+
+[Votre message ici]
+
+École School Malolo
+```
+
+---
+
+### 2. Envoyer un message à toute une classe
+
+**POST** `/communication/classroom/:classroomId` 🔒
+
+**Description:** Envoie un SMS à tous les parents des élèves d'une classe spécifique.
+
+**Body:**
+```json
+{
+  "message": "Sortie pédagogique prévue le 28 mars. Autorisation parentale requise. Coût: 5000 CDF.",
+  "scheduledTime": "2026-03-20T09:00:00Z"
+}
+```
+
+**Exemple:**
+```bash
+POST /api/v1/communication/classroom/69bc6a5b0bf196c9697b6ce3
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "message": "Examen de fin de trimestre du 1er au 5 avril. Merci de bien préparer vos enfants."
+}
+```
+
+**Réponse (200):**
+```json
+{
+  "message": "Messages envoyés à la classe",
+  "classroom": {
+    "name": "6ème Année Test",
+    "code": "6A-TEST",
+    "level": "Primaire"
+  },
+  "summary": {
+    "totalStudents": 35,
+    "studentsWithPhone": 32,
+    "messagesSent": 32,
+    "messagesFailed": 0
+  },
+  "results": [
+    {
+      "studentName": "Jean Dupont",
+      "matricule": "ELV-2026-001",
+      "parentPhone": "+243826016607",
+      "status": "envoyé"
+    },
+    {
+      "studentName": "Sophie Martin",
+      "matricule": "ELV-2026-002",
+      "parentPhone": "+243826016608",
+      "status": "envoyé"
+    }
+  ]
+}
+```
+
+**Format du SMS envoyé:**
+```
+Bonjour,
+
+Message pour la classe 6ème Année Test (6A-TEST):
+
+[Votre message ici]
+
+École School Malolo
+```
+
+---
+
+### 3. Envoyer un message à toute l'école
+
+**POST** `/communication/school` 🔒
+
+**Description:** Envoie un SMS à tous les parents de tous les élèves actifs de l'école.
+
+**Body:**
+```json
+{
+  "message": "L'école sera fermée le 21 mars pour cause de jour férié. Reprise des cours le 22 mars.",
+  "scheduledTime": "2026-03-19T18:00:00Z"
+}
+```
+
+**Exemple:**
+```bash
+POST /api/v1/communication/school
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "message": "Rentrée scolaire 2026-2027 fixée au 1er septembre. Inscriptions ouvertes dès maintenant."
+}
+```
+
+**Réponse (200):**
+```json
+{
+  "message": "Messages envoyés à toute l'école",
+  "summary": {
+    "totalStudents": 245,
+    "studentsWithPhone": 230,
+    "messagesSent": 230,
+    "messagesFailed": 0
+  },
+  "byClass": {
+    "6ème Année A": { "sent": 35, "failed": 0 },
+    "6ème Année B": { "sent": 32, "failed": 0 },
+    "5ème Année A": { "sent": 30, "failed": 0 },
+    "5ème Année B": { "sent": 28, "failed": 0 },
+    "4ème Année": { "sent": 25, "failed": 0 }
+  },
+  "results": [
+    {
+      "studentName": "Jean Dupont",
+      "matricule": "ELV-2026-001",
+      "classroom": "6ème Année A",
+      "parentPhone": "+243826016607",
+      "status": "envoyé"
+    }
+  ]
+}
+```
+
+**Format du SMS envoyé:**
+```
+Bonjour,
+
+Message de l'école:
+
+[Votre message ici]
+
+École School Malolo
+```
+
+---
+
+### 💡 Cas d'usage de la communication
+
+#### 1. Notification de résultats individuels
+```bash
+POST /api/v1/communication/student/STUDENT_ID
+{
+  "message": "Félicitations ! Votre enfant a obtenu la 1ère place de sa classe avec une moyenne de 85%."
+}
+```
+
+#### 2. Convocation pour comportement
+```bash
+POST /api/v1/communication/student/STUDENT_ID
+{
+  "message": "Nous vous prions de bien vouloir passer à l'école demain à 10h pour discuter du comportement de votre enfant."
+}
+```
+
+#### 3. Rappel de paiement pour une classe
+```bash
+POST /api/v1/communication/classroom/CLASSROOM_ID
+{
+  "message": "Rappel : Le minerval du mois de mars est dû. Merci de régulariser avant le 25 mars."
+}
+```
+
+#### 4. Annonce d'événement scolaire
+```bash
+POST /api/v1/communication/school
+{
+  "message": "Journée portes ouvertes le samedi 30 mars de 9h à 16h. Venez découvrir notre école !"
+}
+```
+
+#### 5. Alerte urgente
+```bash
+POST /api/v1/communication/school
+{
+  "message": "URGENT : En raison des conditions météorologiques, l'école est fermée aujourd'hui. Reprise demain."
+}
+```
+
+---
+
+### ⚠️ Points importants
+
+**Prérequis:**
+- L'élève doit avoir un tuteur avec un numéro de téléphone valide
+- Le numéro doit être au format international (ex: +243826016607)
+
+**Limitations:**
+- Les SMS sont envoyés via Infobip
+- Pause de 100ms entre chaque SMS pour éviter la surcharge
+- Les messages sont limités à 160 caractères par SMS (messages longs = plusieurs SMS)
+
+**Bonnes pratiques:**
+- Soyez concis et clair dans vos messages
+- Évitez les caractères spéciaux qui peuvent mal s'afficher
+- Testez d'abord avec un élève avant d'envoyer à toute une classe
+- Vérifiez les numéros de téléphone avant l'envoi massif
+
+**Gestion des erreurs:**
+- Si un parent n'a pas de numéro : il apparaît dans `studentsWithPhone: false`
+- Si l'envoi échoue : détails dans le tableau `errors`
+- Les SMS réussis sont dans le tableau `results`
+
+---
+
+## 📂 Sections
 
 ### 1. Créer une section
 

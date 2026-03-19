@@ -35,11 +35,12 @@ Authorization: Bearer <votre_token>
 5. [Frais Scolaires (School Fees)](#frais-scolaires-school-fees)
 6. [Paiements (Payments)](#paiements-payments)
 7. [Filtres et Recherches Avancées](#filtres-et-recherches-avancées)
-8. [Sections](#sections)
-9. [Options](#options)
-10. [Exemples de Flux Complets](#exemples-de-flux-complets)
-11. [Codes d'Erreur](#codes-derreur)
-12. [Notes Importantes](#notes-importantes)
+8. [Dashboard](#dashboard)
+9. [Sections](#sections)
+10. [Options](#options)
+11. [Exemples de Flux Complets](#exemples-de-flux-complets)
+12. [Codes d'Erreur](#codes-derreur)
+13. [Notes Importantes](#notes-importantes)
 
 ---
 
@@ -1872,7 +1873,169 @@ GET /api/v1/students?page=2&limit=50
 
 ---
 
-## 📂 Sections
+## � Dashboard
+
+### Tableau de bord scolaire
+
+**GET** `/dashboard/school` 🔒
+
+**Description:** Récupère toutes les statistiques importantes pour le tableau de bord de l'école en une seule requête.
+
+**Query Parameters:**
+- `schoolYear` (optionnel): Année scolaire (défaut: année en cours)
+
+**Exemple:**
+```bash
+GET /api/v1/dashboard/school
+Authorization: Bearer <token>
+
+# Avec année scolaire spécifique
+GET /api/v1/dashboard/school?schoolYear=2025-2026
+Authorization: Bearer <token>
+```
+
+**Réponse (200):**
+```json
+{
+  "overview": {
+    "totalStudents": 245,
+    "totalClassrooms": 12,
+    "totalTeachers": 18,
+    "totalSchoolFees": 8,
+    "paymentsThisMonth": 156,
+    "totalAmountThisMonth": 7850000,
+    "collectionRate": 78
+  },
+  "students": {
+    "total": 245,
+    "byGender": [
+      { "gender": "M", "count": 130 },
+      { "gender": "F", "count": 115 }
+    ]
+  },
+  "classrooms": {
+    "total": 12,
+    "byLevel": [
+      { "level": "Primaire", "count": 6 },
+      { "level": "Secondaire", "count": 6 }
+    ],
+    "topClassrooms": [
+      {
+        "name": "6ème Année A",
+        "code": "6A",
+        "level": "Primaire",
+        "studentCount": 35
+      },
+      {
+        "name": "5ème Année B",
+        "code": "5B",
+        "level": "Primaire",
+        "studentCount": 32
+      }
+    ]
+  },
+  "teachers": {
+    "total": 18
+  },
+  "schoolFees": {
+    "total": 8,
+    "byPeriodicity": [
+      { "periodicity": "mensuel", "count": 5 },
+      { "periodicity": "trimestriel", "count": 2 },
+      { "periodicity": "unique", "count": 1 }
+    ]
+  },
+  "payments": {
+    "thisMonth": {
+      "count": 156,
+      "totalAmount": 7850000,
+      "byMethod": [
+        { "method": "cash", "count": 120, "total": 6000000 },
+        { "method": "mobile_money", "count": 30, "total": 1500000 },
+        { "method": "bank_transfer", "count": 6, "total": 350000 }
+      ]
+    },
+    "recent": [
+      {
+        "_id": "...",
+        "studentId": {
+          "matricule": "ELV-2026-001",
+          "firstName": "Jean",
+          "lastName": "Dupont"
+        },
+        "schoolFeeId": {
+          "label": "Minerval Mensuel",
+          "amount": 50000,
+          "currency": "CDF"
+        },
+        "amount": 50000,
+        "paymentDate": "2026-03-19T00:00:00.000Z",
+        "paymentMethod": "cash",
+        "status": "completed"
+      }
+    ],
+    "financial": {
+      "totalExpected": 10000000,
+      "totalCollected": 7850000,
+      "collectionRate": 78,
+      "outstanding": 2150000
+    }
+  },
+  "period": {
+    "month": "mars 2026",
+    "schoolYear": "2026"
+  }
+}
+```
+
+**Utilisation dans le frontend:**
+
+```javascript
+// Exemple React/Vue
+const fetchDashboard = async () => {
+  const response = await fetch('http://64.23.188.15:8000/api/v1/dashboard/school', {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  const data = await response.json();
+  
+  // Utiliser les données
+  console.log(`Total étudiants: ${data.overview.totalStudents}`);
+  console.log(`Taux de recouvrement: ${data.overview.collectionRate}%`);
+  console.log(`Montant collecté ce mois: ${data.payments.thisMonth.totalAmount} CDF`);
+};
+```
+
+**Données disponibles pour le dashboard:**
+
+1. **Vue d'ensemble (overview)**
+   - Nombre total d'étudiants, classes, enseignants, frais
+   - Paiements et montant du mois en cours
+   - Taux de recouvrement global
+
+2. **Étudiants (students)**
+   - Total et répartition par genre
+
+3. **Classes (classrooms)**
+   - Total et répartition par niveau
+   - Top 5 classes avec le plus d'étudiants
+
+4. **Enseignants (teachers)**
+   - Nombre total d'enseignants actifs
+
+5. **Frais scolaires (schoolFees)**
+   - Total et répartition par périodicité
+
+6. **Paiements (payments)**
+   - Statistiques du mois en cours
+   - Répartition par méthode de paiement
+   - 5 derniers paiements
+   - Situation financière globale (attendu vs collecté)
+
+---
+
+## �� Sections
 
 ### 1. Créer une section
 

@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const { isLoggedIn } = require('../middleware');
 const {
   createOption,
   getAllOptions,
@@ -45,7 +46,7 @@ const {
  *       401:
  *         description: Authentification requise
  */
-router.route('/').post(createOption);
+router.route('/').post(isLoggedIn, createOption);
 
 /**
  * @swagger
@@ -77,7 +78,7 @@ router.route('/').post(createOption);
  *       401:
  *         description: Authentification requise
  */
-router.route('/').get(getAllOptions);
+router.route('/').get(isLoggedIn, getAllOptions);
 
 /**
  * @swagger
@@ -93,7 +94,7 @@ router.route('/').get(getAllOptions);
  *       401:
  *         description: Authentification requise
  */
-router.route('/active').get(getActiveOptions);
+router.route('/active').get(isLoggedIn, getActiveOptions);
 
 /**
  * @swagger
@@ -118,7 +119,7 @@ router.route('/active').get(getActiveOptions);
  *       401:
  *         description: Authentification requise
  */
-router.route('/:id').get(getOptionById);
+router.route('/:id').get(isLoggedIn, getOptionById);
 
 /**
  * @swagger
@@ -154,7 +155,7 @@ router.route('/:id').get(getOptionById);
  *       401:
  *         description: Authentification requise
  */
-router.route('/:id').put(updateOption);
+router.route('/:id').put(isLoggedIn, updateOption);
 
 /**
  * @swagger
@@ -179,7 +180,7 @@ router.route('/:id').put(updateOption);
  *       401:
  *         description: Authentification requise
  */
-router.route('/:id').delete(deleteOption);
+router.route('/:id').delete(isLoggedIn, deleteOption);
 
 /**
  * @swagger
@@ -204,7 +205,7 @@ router.route('/:id').delete(deleteOption);
  *       401:
  *         description: Authentification requise
  */
-router.route('/:id/toggle').patch(toggleOptionStatus);
+router.route('/:id/toggle').patch(isLoggedIn, toggleOptionStatus);
 
 /**
  * @swagger
@@ -253,6 +254,6 @@ router.route('/:id/toggle').patch(toggleOptionStatus);
  *       401:
  *         description: Authentification requise
  */
-router.route('/company/:companyId').get(getOptionsByCompany);
+router.route('/company/:companyId').get(isLoggedIn, getOptionsByCompany);
 
 module.exports = router;

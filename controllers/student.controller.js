@@ -243,7 +243,7 @@ exports.getStudentsByClassroom = async (req, res) => {
     const classroom = await Classroom.findOne({ 
       _id: classroomId, 
       companyId 
-    }).populate('sectionId', 'name').populate('optionId', 'name');
+    });
     
     if (!classroom) {
       return res.status(404).json({ message: 'Classe non trouvée ou ne vous appartient pas' });
@@ -268,7 +268,7 @@ exports.getStudentsByClassroom = async (req, res) => {
     const skip = (page - 1) * limit;
     
     const students = await Student.find(filter)
-      .populate('classroomId', 'name level schoolYear sectionId optionId')
+      .populate('classroomId', 'name code schoolYear option')
       .sort({ lastName: 1, firstName: 1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -279,9 +279,10 @@ exports.getStudentsByClassroom = async (req, res) => {
       classroom: {
         _id: classroom._id,
         name: classroom.name,
+        code: classroom.code,
         level: classroom.level,
-        section: classroom.sectionId,
-        option: classroom.optionId,
+        section: classroom.section,
+        option: classroom.option,
         schoolYear: classroom.schoolYear,
         capacity: classroom.capacity
       },

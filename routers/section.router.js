@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const { isLoggedIn } = require('../middleware');
 const {
   createSection,
   getAllSections,
@@ -45,7 +46,7 @@ const {
  *       401:
  *         description: Authentification requise
  */
-router.route('/').post(createSection);
+router.route('/').post(isLoggedIn, createSection);
 
 /**
  * @swagger
@@ -77,7 +78,7 @@ router.route('/').post(createSection);
  *       401:
  *         description: Authentification requise
  */
-router.route('/').get(getAllSections);
+router.route('/').get(isLoggedIn, getAllSections);
 
 /**
  * @swagger
@@ -93,7 +94,7 @@ router.route('/').get(getAllSections);
  *       401:
  *         description: Authentification requise
  */
-router.route('/active').get(getActiveSections);
+router.route('/active').get(isLoggedIn, getActiveSections);
 
 /**
  * @swagger
@@ -118,7 +119,7 @@ router.route('/active').get(getActiveSections);
  *       401:
  *         description: Authentification requise
  */
-router.route('/:id').get(getSectionById);
+router.route('/:id').get(isLoggedIn, getSectionById);
 
 /**
  * @swagger
@@ -154,7 +155,7 @@ router.route('/:id').get(getSectionById);
  *       401:
  *         description: Authentification requise
  */
-router.route('/:id').put(updateSection);
+router.route('/:id').put(isLoggedIn, updateSection);
 
 /**
  * @swagger
@@ -179,7 +180,7 @@ router.route('/:id').put(updateSection);
  *       401:
  *         description: Authentification requise
  */
-router.route('/:id').delete(deleteSection);
+router.route('/:id').delete(isLoggedIn, deleteSection);
 
 /**
  * @swagger
@@ -204,7 +205,7 @@ router.route('/:id').delete(deleteSection);
  *       401:
  *         description: Authentification requise
  */
-router.route('/:id/toggle').patch(toggleSectionStatus);
+router.route('/:id/toggle').patch(isLoggedIn, toggleSectionStatus);
 
 /**
  * @swagger
@@ -253,6 +254,6 @@ router.route('/:id/toggle').patch(toggleSectionStatus);
  *       401:
  *         description: Authentification requise
  */
-router.route('/company/:companyId').get(getSectionsByCompany);
+router.route('/company/:companyId').get(isLoggedIn, getSectionsByCompany);
 
 module.exports = router;

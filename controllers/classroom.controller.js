@@ -51,8 +51,6 @@ exports.getAllClassrooms = async (req, res) => {
     const skip = (page - 1) * limit;
     
     const classrooms = await Classroom.find(filter)
-      .populate('sectionId', 'name active')
-      .populate('optionId', 'name active')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -81,9 +79,7 @@ exports.getClassroomById = async (req, res) => {
     const classroom = await Classroom.findOne({ 
       _id: req.params.id, 
       companyId 
-    })
-      .populate('sectionId', 'name active')
-      .populate('optionId', 'name active');
+    });
 
     if (!classroom) {
       return res.status(404).json({ message: 'Classe non trouvée' });

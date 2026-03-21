@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const { Student } = require('../models/student.model');
 const { Classroom } = require('../models/classroom.model');
 const { Teacher } = require('../models/teacher.model');
@@ -8,7 +7,6 @@ const { Payment } = require('../models/payment.model');
 exports.getSchoolDashboard = async (req, res) => {
   try {
     const companyId = req.companyId;
-    const companyObjectId = new mongoose.Types.ObjectId(companyId);
     const { schoolYear } = req.query;
 
     const currentYear = schoolYear || new Date().getFullYear().toString();
@@ -16,24 +14,24 @@ exports.getSchoolDashboard = async (req, res) => {
     // 1. Statistiques des étudiants
     const totalStudents = await Student.countDocuments({ companyId, status: 'actif' });
     const studentsByGender = await Student.aggregate([
-      { $match: { companyId: companyObjectId, status: 'actif' } },
+      { $match: { companyId, status: 'actif' } },
       { $group: { _id: '$gender', count: { $sum: 1 } } }
     ]);
 
     // 2. Statistiques des classes
     const totalClassrooms = await Classroom.countDocuments({ companyId, active: true });
     const classroomsByLevel = await Classroom.aggregate([
-      { $match: { companyId: companyObjectId, active: true } },
+      { $match: { companyId, active: true } },
       { $group: { _id: '$level', count: { $sum: 1 } } }
     ]);
 
     // 3. Statistiques des enseignants
-    const totalTeachers = await Teacher.countDocuments({ companyId, active: true });
+    const totalTeachers = await Teacher.countDocuments({ companyId, status: 'actif' });
 
     // 4. Statistiques des frais scolaires
     const totalSchoolFees = await SchoolFee.countDocuments({ companyId, active: true });
     const schoolFeesByPeriodicity = await SchoolFee.aggregate([
-      { $match: { companyId: companyObjectId, active: true } },
+      { $match: { companyId, active: true } },
       { $group: { _id: '$periodicity', count: { $sum: 1 } } }
     ]);
 
@@ -49,7 +47,7 @@ exports.getSchoolDashboard = async (req, res) => {
     const totalAmountThisMonth = await Payment.aggregate([
       {
         $match: {
-          companyId: companyObjectId,
+          companyId,
           paymentDate: { $gte: startOfMonth, $lte: endOfMonth }
         }
       },
@@ -65,7 +63,7 @@ exports.getSchoolDashboard = async (req, res) => {
     const paymentsByMethod = await Payment.aggregate([
       {
         $match: {
-          companyId: companyObjectId,
+          companyId,
           paymentDate: { $gte: startOfMonth, $lte: endOfMonth }
         }
       },
@@ -107,7 +105,7 @@ exports.getSchoolDashboard = async (req, res) => {
 
     // 9. Top 5 classes avec le plus d'étudiants
     const topClassrooms = await Student.aggregate([
-      { $match: { companyId: companyObjectId, status: 'actif' } },
+      { $match: { companyId, status: 'actif' } },
       { $group: { _id: '$classroomId', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $limit: 5 },

@@ -1,0 +1,52 @@
+2026-03-21T18:31:39: Express server démarré sur le port 8000
+2026-03-21T18:31:42: Connexion à MongoDB réussie !
+2026-03-21T18:37:49: {
+  _id: new ObjectId("69b6d1480bf196c9697b54e5"),
+  username: 'Makelo Beto',
+  password: '$2b$10$Y4y8I/h2DHzhRtHMW9wmdOeSisxLu4ifMlYxna.chh5rVrnPi0o3G',
+  phone: '+243842613000',
+  role: 'Admin',
+  companyId: {
+    _id: new ObjectId("69b6d1460bf196c9697b54e2"),
+    name: 'School Malolo',
+    currency: 'United States Dollar',
+    signCurrency: '$',
+    lang: 'fr',
+    country: 'United States Dollar - USD',
+    category: {
+      _id: new ObjectId("68bb0e4a592180aafde59c0f"),
+      name: 'École',
+      nameEnglish: 'School'
+    },
+    createdAt: 2026-03-15T15:33:26.630Z,
+    updatedAt: 2026-03-15T15:33:26.630Z
+  },
+  isActived: true,
+  createdAt: 2026-03-15T15:33:28.076Z,
+  updatedAt: 2026-03-15T15:33:28.076Z
+}
+2026-03-21T20:28:46: {
+  _id: new ObjectId("69b6d1480bf196c9697b54e5"),
+  username: 'Makelo Beto',
+  password: '$2b$10$Y4y8I/h2DHzhRtHMW9wmdOeSisxLu4ifMlYxna.chh5rVrnPi0o3G',
+  phone: '+243842613000',
+  role: 'Admin',
+  companyId: {
+    _id: new ObjectId("69b6d1460bf196c9697b54e2"),
+    name: 'School Malolo',
+    currency: 'United States Dollar',
+    signCurrency: '$',
+    lang: 'fr',
+    country: 'United States Dollar - USD',
+    category: {
+      _id: new ObjectId("68bb0e4a592180aafde59c0f"),
+      name: 'École',
+      nameEnglish: 'School'
+    },
+    createdAt: 2026-03-15T15:33:26.630Z,
+    updatedAt: 2026-03-15T15:33:26.630Z
+  },
+  isActived: true,
+  createdAt: 2026-03-15T15:33:28.076Z,
+  updatedAt: 2026-03-15T15:33:28.076Z
+}

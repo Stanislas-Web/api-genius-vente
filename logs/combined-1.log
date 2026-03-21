@@ -1,0 +1,91 @@
+2026-03-21T18:31:39: Express server démarré sur le port 8000
+2026-03-21T18:31:42: Connexion à MongoDB réussie !
+2026-03-21T18:37:49: {
+  _id: new ObjectId("69b6d1480bf196c9697b54e5"),
+  username: 'Makelo Beto',
+  password: '$2b$10$Y4y8I/h2DHzhRtHMW9wmdOeSisxLu4ifMlYxna.chh5rVrnPi0o3G',
+  phone: '+243842613000',
+  role: 'Admin',
+  companyId: {
+    _id: new ObjectId("69b6d1460bf196c9697b54e2"),
+    name: 'School Malolo',
+    currency: 'United States Dollar',
+    signCurrency: '$',
+    lang: 'fr',
+    country: 'United States Dollar - USD',
+    category: {
+      _id: new ObjectId("68bb0e4a592180aafde59c0f"),
+      name: 'École',
+      nameEnglish: 'School'
+    },
+    createdAt: 2026-03-15T15:33:26.630Z,
+    updatedAt: 2026-03-15T15:33:26.630Z
+  },
+  isActived: true,
+  createdAt: 2026-03-15T15:33:28.076Z,
+  updatedAt: 2026-03-15T15:33:28.076Z
+}
+2026-03-21T20:21:00: Error creating student: MongooseServerSelectionError: Could not connect to any servers in your MongoDB Atlas cluster. One common reason is that you're trying to access the database from an IP that isn't whitelisted. Make sure your current IP address is on your Atlas cluster's IP whitelist: https://docs.atlas.mongodb.com/security-whitelist/
+    at Model.$wrapCallback (/Users/stanislasmakengo/Documents/projetnodejs/api-genius-vente/node_modules/mongoose/lib/model.js:4944:32)
+    at /Users/stanislasmakengo/Documents/projetnodejs/api-genius-vente/node_modules/mongoose/lib/query.js:4562:21
+    at /Users/stanislasmakengo/Documents/projetnodejs/api-genius-vente/node_modules/mongoose/lib/helpers/promiseOrCallback.js:32:5
+    at new Promise (<anonymous>)
+    at promiseOrCallback (/Users/stanislasmakengo/Documents/projetnodejs/api-genius-vente/node_modules/mongoose/lib/helpers/promiseOrCallback.js:31:10)
+    at model.Query.exec (/Users/stanislasmakengo/Documents/projetnodejs/api-genius-vente/node_modules/mongoose/lib/query.js:4561:10)
+    at Query.then (/Users/stanislasmakengo/Documents/projetnodejs/api-genius-vente/node_modules/mongoose/lib/query.js:4644:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+  reason: TopologyDescription {
+    type: 'ReplicaSetNoPrimary',
+    servers: Map(3) {
+      'cluster0-shard-00-00.mtx2l.mongodb.net:27017' => [ServerDescription],
+      'cluster0-shard-00-01.mtx2l.mongodb.net:27017' => [ServerDescription],
+      'cluster0-shard-00-02.mtx2l.mongodb.net:27017' => [ServerDescription]
+    },
+    stale: false,
+    compatible: true,
+    heartbeatFrequencyMS: 10000,
+    localThresholdMS: 15,
+    setName: 'atlas-gowtwy-shard-0',
+    maxSetVersion: 21,
+    maxElectionId: new ObjectId("7fffffff0000000000000099"),
+    commonWireVersion: 25,
+    logicalSessionTimeoutMinutes: undefined
+  }
+}
+2026-03-21T20:28:46: {
+  _id: new ObjectId("69b6d1480bf196c9697b54e5"),
+  username: 'Makelo Beto',
+  password: '$2b$10$Y4y8I/h2DHzhRtHMW9wmdOeSisxLu4ifMlYxna.chh5rVrnPi0o3G',
+  phone: '+243842613000',
+  role: 'Admin',
+  companyId: {
+    _id: new ObjectId("69b6d1460bf196c9697b54e2"),
+    name: 'School Malolo',
+    currency: 'United States Dollar',
+    signCurrency: '$',
+    lang: 'fr',
+    country: 'United States Dollar - USD',
+    category: {
+      _id: new ObjectId("68bb0e4a592180aafde59c0f"),
+      name: 'École',
+      nameEnglish: 'School'
+    },
+    createdAt: 2026-03-15T15:33:26.630Z,
+    updatedAt: 2026-03-15T15:33:26.630Z
+  },
+  isActived: true,
+  createdAt: 2026-03-15T15:33:28.076Z,
+  updatedAt: 2026-03-15T15:33:28.076Z
+}
+2026-03-21T20:35:50: Erreur lors de l'envoi du SMS de confirmation: {
+  requestError: {
+    serviceException: { messageId: 'UNAUTHORIZED', text: 'Invalid login details' }
+  }
+}
+2026-03-21T20:36:04: Erreur lors de l'envoi du SMS de confirmation: {
+  requestError: {
+    serviceException: { messageId: 'UNAUTHORIZED', text: 'Invalid login details' }
+  }
+}
+2026-03-21T20:45:29: (node:47672) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)

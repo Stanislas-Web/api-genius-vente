@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const { isLoggedIn } = require('../middleware');
 const {
   createSection,
   getAllSections,
@@ -46,7 +45,7 @@ const {
  *       401:
  *         description: Authentification requise
  */
-router.route('/').post(isLoggedIn, createSection);
+router.route('/').post(createSection);
 
 /**
  * @swagger
@@ -78,7 +77,7 @@ router.route('/').post(isLoggedIn, createSection);
  *       401:
  *         description: Authentification requise
  */
-router.route('/').get(isLoggedIn, getAllSections);
+router.route('/').get(getAllSections);
 
 /**
  * @swagger
@@ -94,7 +93,7 @@ router.route('/').get(isLoggedIn, getAllSections);
  *       401:
  *         description: Authentification requise
  */
-router.route('/active').get(isLoggedIn, getActiveSections);
+router.route('/active').get(getActiveSections);
 
 /**
  * @swagger
@@ -119,7 +118,7 @@ router.route('/active').get(isLoggedIn, getActiveSections);
  *       401:
  *         description: Authentification requise
  */
-router.route('/:id').get(isLoggedIn, getSectionById);
+router.route('/:id').get(getSectionById);
 
 /**
  * @swagger
@@ -155,7 +154,7 @@ router.route('/:id').get(isLoggedIn, getSectionById);
  *       401:
  *         description: Authentification requise
  */
-router.route('/:id').put(isLoggedIn, updateSection);
+router.route('/:id').put(updateSection);
 
 /**
  * @swagger
@@ -180,7 +179,7 @@ router.route('/:id').put(isLoggedIn, updateSection);
  *       401:
  *         description: Authentification requise
  */
-router.route('/:id').delete(isLoggedIn, deleteSection);
+router.route('/:id').delete(deleteSection);
 
 /**
  * @swagger
@@ -205,7 +204,7 @@ router.route('/:id').delete(isLoggedIn, deleteSection);
  *       401:
  *         description: Authentification requise
  */
-router.route('/:id/toggle').patch(isLoggedIn, toggleSectionStatus);
+router.route('/:id/toggle').patch(toggleSectionStatus);
 
 /**
  * @swagger
@@ -254,6 +253,6 @@ router.route('/:id/toggle').patch(isLoggedIn, toggleSectionStatus);
  *       401:
  *         description: Authentification requise
  */
-router.route('/company/:companyId').get(isLoggedIn, getSectionsByCompany);
+router.route('/company/:companyId').get(getSectionsByCompany);
 
 module.exports = router;

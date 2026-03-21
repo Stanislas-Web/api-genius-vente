@@ -267,7 +267,6 @@ exports.getStudentPaymentStatus = async (req, res) => {
       schoolFee: {
         _id: schoolFee._id,
         label: schoolFee.label,
-        code: schoolFee.code,
         amount: schoolFee.amount,
         currency: schoolFee.currency,
         periodicity: schoolFee.periodicity
@@ -366,15 +365,12 @@ exports.getClassroomPayments = async (req, res) => {
       classroom: {
         _id: classroom._id,
         name: classroom.name,
-        code: classroom.code,
         level: classroom.level,
-        section: classroom.section,
-        option: classroom.option
+        schoolYear: classroom.schoolYear
       },
       schoolFee: {
         _id: schoolFee._id,
         label: schoolFee.label,
-        code: schoolFee.code,
         amount: schoolFee.amount,
         currency: schoolFee.currency
       },
@@ -477,7 +473,6 @@ exports.getFullyPaidStudents = async (req, res) => {
       schoolFee: {
         _id: schoolFee._id,
         label: schoolFee.label,
-        code: schoolFee.code,
         amount: schoolFee.amount,
         currency: schoolFee.currency,
         periodicity: schoolFee.periodicity
@@ -576,10 +571,8 @@ exports.getPaidStudentsByClassroom = async (req, res) => {
       classroom: {
         _id: classroom._id,
         name: classroom.name,
-        code: classroom.code,
         level: classroom.level,
-        section: classroom.section,
-        option: classroom.option
+        schoolYear: classroom.schoolYear
       },
       schoolFee: {
         _id: schoolFee._id,
@@ -750,7 +743,7 @@ exports.getGlobalStatistics = async (req, res) => {
       // Récupérer les paiements pour ce frais
       const feePayments = allPayments.filter(payment => 
         payment.schoolFeeId.toString() === schoolFee._id.toString() &&
-        studentsInFeeIds.includes(payment.studentId)
+        studentsInFeeIds.some(id => id.toString() === payment.studentId.toString())
       );
 
       // Calculer les statistiques pour ce frais
@@ -962,7 +955,6 @@ exports.getStudentsPaidAboveAmount = async (req, res) => {
       schoolFee: {
         _id: schoolFee._id,
         label: schoolFee.label,
-        code: schoolFee.code,
         amount: schoolFee.amount,
         currency: schoolFee.currency,
         periodicity: schoolFee.periodicity
@@ -1074,7 +1066,6 @@ exports.getUnpaidStudents = async (req, res) => {
       schoolFee: {
         _id: schoolFee._id,
         label: schoolFee.label,
-        code: schoolFee.code,
         amount: schoolFee.amount,
         currency: schoolFee.currency,
         periodicity: schoolFee.periodicity

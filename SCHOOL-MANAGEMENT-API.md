@@ -305,15 +305,15 @@ Authorization: Bearer <votre_token>
 
 ### 6. Activer/Désactiver une classe
 
-**PATCH** `/classrooms/:id/toggle-active` 🔒
+**PATCH** `/classrooms/:id/active` 🔒
 
 **Réponse (200):**
 ```json
 {
-  "message": "Classroom status updated",
+  "message": "Classe désactivée avec succès",
   "classroom": {
     "_id": "...",
-    "isActive": false
+    "active": false
   }
 }
 ```
@@ -426,9 +426,27 @@ Authorization: Bearer <votre_token>
 
 ---
 
-### 5. Supprimer un frais scolaire
+### 5. Activer/Désactiver un frais scolaire
 
-**DELETE** `/school-fees/:id` 🔒
+**PATCH** `/school-fees/:id/active` 🔒
+
+**Description:** Toggle le statut actif/inactif d'un frais scolaire.
+
+**Réponse (200):**
+```json
+{
+  "message": "Frais scolaire désactivé avec succès",
+  "schoolFee": {
+    "_id": "...",
+    "label": "Minerval Mensuel",
+    "active": false
+  }
+}
+```
+
+> ⚠️ **Note:** Il n'y a pas de suppression définitive des frais scolaires. Utilisez ce toggle pour désactiver un frais.
+
+---
 
 ## 👨‍🎓 Étudiants (Students)
 
@@ -644,14 +662,91 @@ Authorization: Bearer <votre_token>
 
 ### 6. Transférer un étudiant de classe
 
-**PATCH** `/students/:id/transfer` 🔒
+**POST** `/students/:id/move` 🔒
+
+**Description:** Transfère un élève vers une nouvelle classe. Le statut de l'élève passe automatiquement à `transfert`.
 
 **Body:**
 ```json
 {
-  "newClassroomId": "6734be089acec1931a6e0b46"
+  "classroomId": "6734be089acec1931a6e0b46",
+  "schoolYear": "2025-2026"
 }
 ```
+
+**Champs:**
+- `classroomId` (requis): ID de la nouvelle classe
+- `schoolYear` (optionnel): Année scolaire (si omis, utilise celle de la nouvelle classe)
+
+**Réponse (200):**
+```json
+{
+  "message": "Élève transféré avec succès",
+  "student": {
+    "_id": "...",
+    "firstName": "Jean",
+    "lastName": "Dupont",
+    "classroomId": {
+      "_id": "6734be089acec1931a6e0b46",
+      "name": "5ème Année B",
+      "schoolYear": "2025-2026"
+    },
+    "status": "transfert"
+  }
+}
+```
+
+---
+
+### 7. Étudiants d'une classe spécifique
+
+**GET** `/students/classroom/:classroomId` 🔒
+
+**Description:** Récupère tous les étudiants d'une classe spécifique avec filtres et pagination.
+
+**Query Parameters:**
+- `status` (optionnel): Filtrer par statut (`actif`, `transfert`, `sorti`)
+- `q` (optionnel): Recherche textuelle (nom, prénom, matricule)
+- `page` (optionnel): Numéro de page (défaut: 1)
+- `limit` (optionnel): Éléments par page (défaut: 20)
+
+**Exemple:**
+```bash
+# Tous les étudiants actifs d'une classe
+GET /api/v1/students/classroom/69bc6a5b0bf196c9697b6ce3?status=actif
+
+# Rechercher dans la classe
+GET /api/v1/students/classroom/69bc6a5b0bf196c9697b6ce3?q=jean
+```
+
+**Réponse (200):**
+```json
+{
+  "classroom": {
+    "_id": "69bc6a5b0bf196c9697b6ce3",
+    "name": "6ème Année A",
+    "level": "Primaire"
+  },
+  "students": [
+    {
+      "_id": "...",
+      "matricule": "ELV-2026-001",
+      "firstName": "Jean",
+      "lastName": "Dupont",
+      "gender": "M",
+      "status": "actif"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 35,
+    "pages": 2
+  }
+}
+```
+
+---
 
 ## 👨‍🏫 Enseignants (Teachers)
 
@@ -759,9 +854,9 @@ Authorization: Bearer <votre_token>
 
 ---
 
-### 5. Supprimer un enseignant
+~~### 5. Supprimer un enseignant~~
 
-**DELETE** `/teachers/:id` 🔒
+> ⚠️ **Note:** La suppression d'un enseignant n'est pas implémentée. Utilisez la mise à jour (`PUT /teachers/:id`) pour désactiver un enseignant en passant `active: false`.
 
 ## 💳 Paiements (Payments)
 
@@ -2335,9 +2430,24 @@ POST /api/v1/communication/school
 **Body:**
 ```json
 {
-  "name": "Scientifique",
-  "description": "Section sciences et mathématiques",
-  "code": "SCI"
+  "name": "Scientifique"
+}
+```
+
+**Champs:**
+- `name` (requis): Nom de la section
+
+**Réponse (201):**
+```json
+{
+  "message": "Section créée avec succès",
+  "data": {
+    "_id": "...",
+    "name": "Scientifique",
+    "companyId": "...",
+    "active": true,
+    "createdAt": "2026-03-19T18:00:00.000Z"
+  }
 }
 ```
 
@@ -2349,21 +2459,57 @@ POST /api/v1/communication/school
 
 ---
 
-### 3. Récupérer une section
+### 3. Lister les sections actives
+
+**GET** `/sections/active` 🔒
+
+**Description:** Récupère uniquement les sections avec `active: true`.
+
+---
+
+### 4. Récupérer une section
 
 **GET** `/sections/:id` 🔒
 
 ---
 
-### 4. Mettre à jour une section
+### 5. Mettre à jour une section
 
 **PUT** `/sections/:id` 🔒
 
 ---
 
-### 5. Supprimer une section
+### 6. Supprimer une section
 
 **DELETE** `/sections/:id` 🔒
+
+---
+
+### 7. Activer/Désactiver une section
+
+**PATCH** `/sections/:id/toggle` 🔒
+
+**Description:** Toggle le statut actif/inactif d'une section.
+
+**Réponse (200):**
+```json
+{
+  "message": "Section désactivée avec succès",
+  "data": {
+    "_id": "...",
+    "name": "Scientifique",
+    "active": false
+  }
+}
+```
+
+---
+
+### 8. Sections par entreprise
+
+**GET** `/sections/company/:companyId` 🔒
+
+**Description:** Récupère toutes les sections d'une entreprise spécifique.
 
 ---
 
@@ -2378,8 +2524,28 @@ POST /api/v1/communication/school
 {
   "name": "Math-Physique",
   "sectionId": "6734be089acec1931a6e0b42",
-  "description": "Option mathématiques et physique",
   "code": "MP"
+}
+```
+
+**Champs:**
+- `name` (requis): Nom de l'option
+- `sectionId` (optionnel): ID de la section parente
+- `code` (optionnel): Code court de l'option
+
+**Réponse (201):**
+```json
+{
+  "message": "Option créée avec succès",
+  "data": {
+    "_id": "...",
+    "name": "Math-Physique",
+    "code": "MP",
+    "sectionId": "6734be089acec1931a6e0b42",
+    "companyId": "...",
+    "active": true,
+    "createdAt": "2026-03-19T18:00:00.000Z"
+  }
 }
 ```
 
@@ -2391,21 +2557,57 @@ POST /api/v1/communication/school
 
 ---
 
-### 3. Récupérer une option
+### 3. Lister les options actives
+
+**GET** `/options/active` 🔒
+
+**Description:** Récupère uniquement les options avec `active: true`.
+
+---
+
+### 4. Récupérer une option
 
 **GET** `/options/:id` 🔒
 
 ---
 
-### 4. Mettre à jour une option
+### 5. Mettre à jour une option
 
 **PUT** `/options/:id` 🔒
 
 ---
 
-### 5. Supprimer une option
+### 6. Supprimer une option
 
 **DELETE** `/options/:id` 🔒
+
+---
+
+### 7. Activer/Désactiver une option
+
+**PATCH** `/options/:id/toggle` 🔒
+
+**Description:** Toggle le statut actif/inactif d'une option.
+
+**Réponse (200):**
+```json
+{
+  "message": "Option désactivée avec succès",
+  "data": {
+    "_id": "...",
+    "name": "Math-Physique",
+    "active": false
+  }
+}
+```
+
+---
+
+### 8. Options par entreprise
+
+**GET** `/options/company/:companyId` 🔒
+
+**Description:** Récupère toutes les options d'une entreprise spécifique.
 
 ---
 

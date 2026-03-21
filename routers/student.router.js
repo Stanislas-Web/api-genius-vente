@@ -83,6 +83,54 @@ router.post('/', createStudent);
 
 /**
  * @swagger
+ * /students/classroom/{classroomId}:
+ *   get:
+ *     summary: Récupérer les élèves d'une classe spécifique
+ *     tags: [Students]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: classroomId
+ *         required: true
+ *         description: ID de la classe
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Numéro de page
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Nombre d'éléments par page
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [actif, transfert, sorti]
+ *         description: Filtrer par statut
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Recherche textuelle
+ *     responses:
+ *       200:
+ *         description: Liste des élèves de la classe récupérée avec succès
+ *       404:
+ *         description: Classe non trouvée
+ *       500:
+ *         description: Erreur serveur
+ */
+router.get('/classroom/:classroomId', getStudentsByClassroom);
+
+/**
+ * @swagger
  * /students:
  *   get:
  *     summary: Récupérer tous les élèves
@@ -282,92 +330,5 @@ router.delete('/:id', deleteStudent);
  *         description: Erreur serveur
  */
 router.post('/:id/move', moveStudent);
-
-/**
- * @swagger
- * /students/classroom/{classroomId}:
- *   get:
- *     summary: Récupérer les élèves d'une classe spécifique
- *     tags: [Students]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: classroomId
- *         required: true
- *         description: ID de la classe
- *         schema:
- *           type: string
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: Numéro de page
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 20
- *         description: Nombre d'éléments par page
- *       - in: query
- *         name: status
- *         schema:
- *           type: string
- *           enum: [actif, transfert, sorti]
- *         description: Filtrer par statut
- *       - in: query
- *         name: q
- *         schema:
- *           type: string
- *         description: Recherche textuelle
- *     responses:
- *       200:
- *         description: Liste des élèves de la classe récupérée avec succès
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 classroom:
- *                   type: object
- *                   properties:
- *                     _id:
- *                       type: string
- *                     name:
- *                       type: string
- *                     code:
- *                       type: string
- *                     level:
- *                       type: string
- *                     section:
- *                       type: string
- *                     option:
- *                       type: string
- *                     schoolYear:
- *                       type: string
- *                     capacity:
- *                       type: number
- *                 students:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Student'
- *                 pagination:
- *                   type: object
- *                   properties:
- *                     page:
- *                       type: integer
- *                     limit:
- *                       type: integer
- *                     total:
- *                       type: integer
- *                     pages:
- *                       type: integer
- *       404:
- *         description: Classe non trouvée
- *       500:
- *         description: Erreur serveur
- */
-router.get('/classroom/:classroomId', getStudentsByClassroom);
 
 module.exports = router;

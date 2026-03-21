@@ -1,0 +1,39 @@
+2026-03-21T20:21:00: Error creating student: MongooseServerSelectionError: Could not connect to any servers in your MongoDB Atlas cluster. One common reason is that you're trying to access the database from an IP that isn't whitelisted. Make sure your current IP address is on your Atlas cluster's IP whitelist: https://docs.atlas.mongodb.com/security-whitelist/
+    at Model.$wrapCallback (/Users/stanislasmakengo/Documents/projetnodejs/api-genius-vente/node_modules/mongoose/lib/model.js:4944:32)
+    at /Users/stanislasmakengo/Documents/projetnodejs/api-genius-vente/node_modules/mongoose/lib/query.js:4562:21
+    at /Users/stanislasmakengo/Documents/projetnodejs/api-genius-vente/node_modules/mongoose/lib/helpers/promiseOrCallback.js:32:5
+    at new Promise (<anonymous>)
+    at promiseOrCallback (/Users/stanislasmakengo/Documents/projetnodejs/api-genius-vente/node_modules/mongoose/lib/helpers/promiseOrCallback.js:31:10)
+    at model.Query.exec (/Users/stanislasmakengo/Documents/projetnodejs/api-genius-vente/node_modules/mongoose/lib/query.js:4561:10)
+    at Query.then (/Users/stanislasmakengo/Documents/projetnodejs/api-genius-vente/node_modules/mongoose/lib/query.js:4644:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+  reason: TopologyDescription {
+    type: 'ReplicaSetNoPrimary',
+    servers: Map(3) {
+      'cluster0-shard-00-00.mtx2l.mongodb.net:27017' => [ServerDescription],
+      'cluster0-shard-00-01.mtx2l.mongodb.net:27017' => [ServerDescription],
+      'cluster0-shard-00-02.mtx2l.mongodb.net:27017' => [ServerDescription]
+    },
+    stale: false,
+    compatible: true,
+    heartbeatFrequencyMS: 10000,
+    localThresholdMS: 15,
+    setName: 'atlas-gowtwy-shard-0',
+    maxSetVersion: 21,
+    maxElectionId: new ObjectId("7fffffff0000000000000099"),
+    commonWireVersion: 25,
+    logicalSessionTimeoutMinutes: undefined
+  }
+}
+2026-03-21T20:35:50: Erreur lors de l'envoi du SMS de confirmation: {
+  requestError: {
+    serviceException: { messageId: 'UNAUTHORIZED', text: 'Invalid login details' }
+  }
+}
+2026-03-21T20:36:04: Erreur lors de l'envoi du SMS de confirmation: {
+  requestError: {
+    serviceException: { messageId: 'UNAUTHORIZED', text: 'Invalid login details' }
+  }
+}
+2026-03-21T20:45:29: (node:47672) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)

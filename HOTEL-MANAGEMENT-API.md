@@ -15,11 +15,10 @@ Module complet de gestion d'hôtel intégré à l'API Genius Vente. Ce module pe
 1. [Types de Chambres (RoomTypes)](#types-de-chambres)
 2. [Chambres (Rooms)](#chambres)
 3. [Réservations (Bookings)](#réservations)
-4. [Paiement sur réservation](#paiement-sur-réservation)
-5. [Rapports des réservations](#rapports-des-réservations)
-6. [Dashboard Hôtel](#dashboard-hôtel)
-7. [Factures (Invoices)](#factures)
-8. [Exemples de flux complets](#exemples-de-flux)
+4. [Rapports des réservations](#rapports-des-réservations)
+5. [Dashboard Hôtel](#dashboard-hôtel)
+6. [Factures (Invoices)](#factures)
+7. [Exemples de flux complets](#exemples-de-flux)
 
 ---
 
@@ -374,68 +373,9 @@ Annule une réservation et libère la chambre.
 
 ---
 
-## Paiement sur réservation
-
-### 8. Effectuer un paiement sur une réservation en attente
-
-**POST** `/bookings/:id/pay`
-
-Effectue un paiement (total ou partiel) sur une réservation en statut `pending`. Le paiement peut être effectué en plusieurs fois.
-
-**Body:**
-```json
-{
-  "amount": 200,
-  "paymentMethod": "cash"
-}
-```
-
-**Champs du body:**
-- `amount` (required): Montant à payer (doit être > 0)
-- `paymentMethod` (optional): Méthode de paiement (`cash`, `mobile_money`, `bank_transfer`, `card`). Défaut: `cash`
-
-**Règles:**
-- Le paiement ne peut être effectué que sur une réservation **en attente (pending)**
-- Le montant ne peut pas dépasser le montant restant à payer
-- Les paiements partiels sont cumulés
-
-**Réponse (200) - Paiement partiel:**
-```json
-{
-  "message": "Paiement partiel effectué",
-  "booking": {...},
-  "paymentDetails": {
-    "amountPaid": 200,
-    "totalPaid": 200,
-    "remainingAmount": 300,
-    "finalAmount": 500,
-    "paymentMethod": "cash",
-    "paymentDate": "2026-03-20T10:30:00.000Z"
-  }
-}
-```
-
-**Réponse (200) - Paiement complet:**
-```json
-{
-  "message": "Paiement complet effectué",
-  "booking": {...},
-  "paymentDetails": {
-    "amountPaid": 300,
-    "totalPaid": 500,
-    "remainingAmount": 0,
-    "finalAmount": 500,
-    "paymentMethod": "mobile_money",
-    "paymentDate": "2026-03-20T11:00:00.000Z"
-  }
-}
-```
-
----
-
 ## Rapports des réservations
 
-### 9. Rapport résumé
+### 8. Rapport résumé
 
 **GET** `/bookings/reports/summary?startDate=2026-03-01&endDate=2026-03-31`
 
@@ -482,7 +422,7 @@ Retourne un résumé complet des réservations avec totaux, statistiques par sta
 
 ---
 
-### 10. Rapport détaillé
+### 9. Rapport détaillé
 
 **GET** `/bookings/reports/detailed?startDate=2026-03-01&endDate=2026-03-31&status=checked-out&page=1&limit=50`
 
@@ -533,7 +473,7 @@ Retourne la liste détaillée des réservations avec informations enrichies: dur
 
 ---
 
-### 11. Rapport par chambre
+### 10. Rapport par chambre
 
 **GET** `/bookings/reports/by-room?startDate=2026-03-01&endDate=2026-03-31`
 
@@ -561,7 +501,7 @@ Retourne les statistiques de réservations regroupées par chambre.
 
 ## Dashboard Hôtel
 
-### 12. Tableau de bord hôtel
+### 11. Tableau de bord hôtel
 
 **GET** `/dashboard/hotel`
 

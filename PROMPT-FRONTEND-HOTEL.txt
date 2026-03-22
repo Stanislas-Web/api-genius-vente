@@ -1,0 +1,165 @@
+MISE À JOUR FRONTEND - API HÔTEL (Ne rien casser)
+
+=============================================================
+CONTEXTE
+=============================================================
+L'API backend a été mise à jour avec de nouvelles fonctionnalités. Le frontend doit s'adapter SANS CASSER ce qui existe déjà. Tous les endpoints existants fonctionnent exactement comme avant — on ajoute juste de nouveaux champs et de nouvelles pages/sections.
+
+Base URL : {BASE_URL}/api/v1
+Auth : Header Authorization: Bearer {token}
+
+
+=============================================================
+1. FORMULAIRE DE RÉSERVATION — Ajouter 3 champs optionnels
+=============================================================
+
+Dans le formulaire de création de réservation (POST /bookings), ajouter ces champs OPTIONNELS (ne pas les rendre requis) :
+
+| Champ          | Type              | Description                                      |
+|----------------|-------------------|--------------------------------------------------|
+| nomFemme       | string (optionnel)| Nom de la femme du client                        |
+| paidAmount     | number (optionnel)| Montant payé directement à la réservation        |
+| paymentMethod  | select (optionnel)| cash, mobile_money, bank_transfer, card           |
+
+Comportement attendu :
+- Si paidAmount est renseigné, afficher aussi le champ paymentMethod (défaut: cash)
+- Si paidAmount n'est pas renseigné, ne pas envoyer ces champs dans le body (ou envoyer 0)
+- Le champ nomFemme est toujours visible mais optionnel (string vide par défaut)
+- NE TOUCHE PAS aux champs existants (roomId, clientName, clientPhone, clientEmail, cardNumber, checkIn, checkOut, rateType, negotiatedRate, notes)
+
+Exemple de body envoyé :
+{
+  "roomId": "...",
+  "clientName": "Jean Boko",
+  "clientPhone": "+243826016607",
+  "checkIn": "2026-03-22T14:00:00Z",
+  "checkOut": "2026-03-25T11:00:00Z",
+  "rateType": "standard",
+  "notes": "Client VIP",
+  "nomFemme": "Marie Boko",
+  "paidAmount": 200,
+  "paymentMethod": "cash"
+}
+
+Nouveaux champs retournés dans la réponse :
+- nomFemme : string
+- paidAmount : number (montant déjà payé)
+- remainingAmount : number (montant restant à payer)
+- paymentMethod : string
+- paymentDate : date ISO (si paiement effectué)
+
+Affichage dans la liste/détail des réservations :
+- Afficher nomFemme à côté du nom du client si non vide
+- Afficher paidAmount / finalAmount comme barre de progression ou texte "Payé: 200/500$"
+- Afficher remainingAmount en rouge si > 0
+- Afficher paymentMethod avec une icône ou badge
+
+
+=============================================================
+2. RAPPORTS DES RÉSERVATIONS — Nouvelle page/section
+=============================================================
+
+Créer une page "Rapports" avec 3 onglets/sections :
+
+--- 2a. Rapport Résumé ---
+Endpoint : GET /bookings/reports/summary?startDate=2026-03-01&endDate=2026-03-31&status=
+
+Filtres UI : Date début, Date fin, Statut (optionnel)
+
+Afficher :
+- Cards en haut : totalBookings, totalFinalAmount, totalPaidAmount, totalRemainingAmount, averageAmount
+- Graphique camembert/barres : bookingsByStatus (count par statut)
+- Graphique barres/lignes : bookingsByDay (revenue par jour)
+- Graphique : bookingsByRateType (standard vs negotiated)
+- Graphique : bookingsByPaymentMethod (cash, mobile_money, etc.)
+
+--- 2b. Rapport Détaillé ---
+Endpoint : GET /bookings/reports/detailed?startDate=...&endDate=...&status=...&roomId=...&page=1&limit=50
+
+Filtres UI : Date début, Date fin, Statut, Chambre, Pagination
+
+Afficher un tableau avec colonnes :
+| Colonne          | Champ               |
+|------------------|---------------------|
+| Client           | clientName          |
+| Nom Femme        | nomFemme            |
+| Chambre          | roomName            |
+| Type             | roomTypeName        |
+| Check-in         | checkInFormatted    |
+| Check-out        | checkOutFormatted   |
+| Durée            | durationText        |
+| Montant          | finalAmount         |
+| Payé             | paidAmount          |
+| Reste            | remainingAmount     |
+| Statut paiement  | paymentStatus       |
+| Méthode          | paymentMethod       |
+| Statut           | status              |
+
+paymentStatus → badge couleur :
+  - paid = vert
+  - partial = orange
+  - unpaid = rouge
+  - no-amount = gris
+
+Pagination : totalPages, currentPage, total
+
+--- 2c. Rapport par Chambre ---
+Endpoint : GET /bookings/reports/by-room?startDate=...&endDate=...
+
+Afficher un tableau :
+| Colonne          | Champ          |
+|------------------|----------------|
+| Chambre          | roomName       |
+| Type             | roomTypeName   |
+| Nb Réservations  | totalBookings  |
+| Revenu Total     | totalAmount    |
+| Total Payé       | totalPaid      |
+| Reste            | totalRemaining |
+| Moyenne          | avgAmount      |
+
+
+=============================================================
+3. DASHBOARD HÔTEL — Nouvelle page
+=============================================================
+
+Endpoint : GET /dashboard/hotel
+
+Layout suggéré :
+
+LIGNE 1 — Cards overview :
+- Total Chambres : overview.totalRooms
+- Total Réservations : overview.totalBookings
+- Taux d'occupation : overview.occupancyRate %
+- Réservations aujourd'hui : overview.bookingsToday
+- Check-ins aujourd'hui : overview.checkInsToday
+- Check-outs aujourd'hui : overview.checkOutsToday
+
+LIGNE 2 — Statut des chambres (graphique donut) :
+- Disponibles : rooms.available (vert)
+- Occupées : rooms.occupied (rouge)
+- Réservées : rooms.reserved (orange)
+- Maintenance : rooms.maintenance (gris)
+
+LIGNE 3 — Revenus :
+- Card "Aujourd'hui" : revenue.today.total / revenue.today.paid
+- Card "Ce mois" : revenue.thisMonth.total / revenue.thisMonth.paid / revenue.thisMonth.remaining
+- Graphique barres : revenue.byDay[] → axe X = _id (date), axe Y = revenue et paid
+- Graphique camembert : revenue.byPaymentMethod[] → method / totalPaid
+
+LIGNE 4 — Top 5 chambres :
+- Tableau : topRooms[] → roomNumber, totalBookings, totalRevenue, totalPaid
+
+LIGNE 5 — Dernières réservations :
+- Liste/tableau : recentBookings[] → clientName, nomFemme, roomId.roomNumber, roomId.roomTypeId.name, status, finalAmount, paidAmount, remainingAmount, paymentMethod
+
+
+=============================================================
+IMPORTANT — NE PAS CASSER
+=============================================================
+
+- NE SUPPRIME AUCUN CHAMP EXISTANT dans les formulaires
+- Les nouveaux champs sont TOUS OPTIONNELS — le formulaire doit fonctionner sans les remplir
+- Les anciens endpoints n'ont pas changé — seuls de nouveaux champs ont été ajoutés aux réponses
+- Le login n'a pas changé : POST /auth/login avec phone + password
+- L'authentification n'a pas changé : Authorization: Bearer {token}
+- Les réservations existantes sans nomFemme/paidAmount auront ces champs à "" et 0 respectivement — gère ce cas dans l'affichage (ne pas afficher "Nom femme: " si vide)

@@ -8,7 +8,6 @@ const {
   checkIn,
   checkOut,
   cancelBooking,
-  payBooking,
   getBookingReportSummary,
   getBookingReportDetailed,
   getBookingReportByRoom
@@ -337,48 +336,5 @@ router.post('/:id/check-out', checkOut);
  *         description: Réservation non trouvée
  */
 router.post('/:id/cancel', cancelBooking);
-
-/**
- * @swagger
- * /bookings/{id}/pay:
- *   post:
- *     summary: Effectuer un paiement sur une réservation en attente
- *     tags: [Bookings]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - amount
- *             properties:
- *               amount:
- *                 type: number
- *                 description: Montant à payer
- *               paymentMethod:
- *                 type: string
- *                 enum: [cash, mobile_money, bank_transfer, card]
- *                 description: Méthode de paiement
- *           example:
- *             amount: 200
- *             paymentMethod: "cash"
- *     responses:
- *       200:
- *         description: Paiement effectué avec succès
- *       400:
- *         description: Montant invalide ou réservation non en attente
- *       404:
- *         description: Réservation non trouvée
- */
-router.post('/:id/pay', payBooking);
 
 module.exports = router;

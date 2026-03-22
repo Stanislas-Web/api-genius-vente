@@ -50,3 +50,61 @@
   createdAt: 2026-03-15T15:33:28.076Z,
   updatedAt: 2026-03-15T15:33:28.076Z
 }
+2026-03-22T13:43:33: Not all input has been taken into account at your final specification.
+2026-03-22T13:43:33: Express server démarré sur le port 8000
+2026-03-22T13:43:36: Connexion à MongoDB réussie !
+2026-03-22T13:44:01: Express server démarré sur le port 8000
+2026-03-22T13:44:02: Connexion à MongoDB réussie !
+2026-03-22T13:46:45: {
+  _id: new ObjectId("68c4a92d56955a18e752e21e"),
+  username: 'testuser',
+  password: '$2b$10$llpJ/hsERQMlmh5cGA2Dfu776eVU7d4DikwhIQipe1EQEdGZ4SPNy',
+  phone: '1234567890',
+  role: 'Admin',
+  companyId: {
+    _id: new ObjectId("68c4a92d56955a18e752e21b"),
+    name: 'Test School',
+    address: '123 Test Street',
+    currency: 'XAF',
+    signCurrency: 'FCFA',
+    lang: 'fr',
+    country: 'Cameroon',
+    category: {
+      _id: new ObjectId("68bb0e4a592180aafde59c0f"),
+      name: 'École',
+      nameEnglish: 'School'
+    },
+    createdAt: 2025-09-12T23:13:49.598Z,
+    updatedAt: 2025-09-12T23:13:49.598Z
+  },
+  isActived: true,
+  createdAt: 2025-09-12T23:13:49.942Z,
+  updatedAt: 2025-09-12T23:13:49.942Z
+}
+2026-03-22T13:47:52: null
+2026-03-22T13:48:03: null
+2026-03-22T13:49:44: {
+  _id: new ObjectId("69bf3278d094e4b82957222b"),
+  username: 'jules Boko',
+  password: '$2b$10$rjUWldnW9aKxRhz8/8dzZe0LIVWa/3FnFzkzoCFcD.BJ903RA4ljy',
+  phone: '+243842613111',
+  role: 'Admin',
+  companyId: {
+    _id: new ObjectId("69bf3277d094e4b829572228"),
+    name: 'LG Lodge',
+    currency: 'United States Dollar',
+    signCurrency: '$',
+    lang: 'fr',
+    country: 'United States Dollar - USD',
+    category: {
+      _id: new ObjectId("69bb913200ce258021e852cf"),
+      name: 'Hotel',
+      nameEnglish: 'Hotel'
+    },
+    createdAt: 2026-03-22T00:06:15.150Z,
+    updatedAt: 2026-03-22T00:06:15.150Z
+  },
+  isActived: true,
+  createdAt: 2026-03-22T00:06:16.411Z,
+  updatedAt: 2026-03-22T00:06:16.411Z
+}

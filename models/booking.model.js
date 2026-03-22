@@ -58,7 +58,20 @@ const mongoose = require('mongoose');
  *         notes:
  *           type: string
  *           description: Notes ou remarques sur la réservation
- */
+ *         nomFemme:
+ *           type: string
+ *           description: Nom de la femme du client (optionnel)
+ *         paidAmount:
+ *           type: number
+ *           description: Montant déjà payé
+ *         paymentMethod:
+ *           type: string
+ *           enum: [cash, mobile_money, bank_transfer, card]
+ *           description: Méthode de paiement
+ *         paymentDate:
+ *           type: string
+ *           format: date-time
+ *           description: Date du paiement */
 const bookingSchema = new mongoose.Schema({
   companyId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -115,6 +128,26 @@ const bookingSchema = new mongoose.Schema({
   notes: {
     type: String,
     default: ''
+  },
+  nomFemme: {
+    type: String,
+    default: ''
+  },
+  paidAmount: {
+    type: Number,
+    default: 0
+  },
+  remainingAmount: {
+    type: Number,
+    default: 0
+  },
+  paymentMethod: {
+    type: String,
+    enum: ['cash', 'mobile_money', 'bank_transfer', 'card', ''],
+    default: ''
+  },
+  paymentDate: {
+    type: Date
   }
 }, { timestamps: true, versionKey: false });
 

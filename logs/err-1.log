@@ -37,3 +37,24 @@
 }
 2026-03-21T20:45:29: (node:47672) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-03-22T13:43:33: Here's the report: 
+
+
+ Error in ./models/booking.model.js :
+YAMLSemanticError: Nested mappings are not allowed in compact mappings at line 56, column 24:
+
+          description: Notes ou remarques sur la réservation *         nomFemme:
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^…
+
+YAMLSemanticError: Map keys must be unique; "type" is repeated at line 55, column 11:
+
+          type: string
+          ^^^^^^^^^^^^…
+
+YAMLSemanticError: Map keys must be unique; "description" is repeated at line 55, column 11:
+
+          type: string
+          ^^^^^^^^^^^^…
+
+2026-03-22T13:53:00: (node:21401) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)

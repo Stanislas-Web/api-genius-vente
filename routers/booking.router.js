@@ -7,7 +7,11 @@ const {
   updateBooking,
   checkIn,
   checkOut,
-  cancelBooking
+  cancelBooking,
+  payBooking,
+  getBookingReportSummary,
+  getBookingReportDetailed,
+  getBookingReportByRoom
 } = require('../controllers/booking.controller');
 
 /**
@@ -42,6 +46,7 @@ const {
  *             rateType: "negotiated"
  *             negotiatedRate: 400
  *             notes: "Client VIP"
+ *             nomFemme: "Marie Dupont"
  *     responses:
  *       201:
  *         description: Réservation créée avec succès
@@ -97,6 +102,106 @@ router.post('/', createBooking);
  *         description: Liste des réservations
  */
 router.get('/', getAllBookings);
+
+/**
+ * @swagger
+ * /bookings/reports/summary:
+ *   get:
+ *     summary: Rapport résumé des réservations (totaux, par statut, par jour)
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Date de début
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Date de fin
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [pending, checked-in, checked-out, cancelled]
+ *         description: Filtrer par statut
+ *     responses:
+ *       200:
+ *         description: Rapport résumé des réservations
+ */
+router.get('/reports/summary', getBookingReportSummary);
+
+/**
+ * @swagger
+ * /bookings/reports/detailed:
+ *   get:
+ *     summary: Rapport détaillé des réservations (prix, durée, heure)
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [pending, checked-in, checked-out, cancelled]
+ *       - in: query
+ *         name: roomId
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Rapport détaillé des réservations
+ */
+router.get('/reports/detailed', getBookingReportDetailed);
+
+/**
+ * @swagger
+ * /bookings/reports/by-room:
+ *   get:
+ *     summary: Rapport des réservations par chambre
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *     responses:
+ *       200:
+ *         description: Rapport par chambre
+ */
+router.get('/reports/by-room', getBookingReportByRoom);
 
 /**
  * @swagger
@@ -230,5 +335,48 @@ router.post('/:id/check-out', checkOut);
  *         description: Réservation non trouvée
  */
 router.post('/:id/cancel', cancelBooking);
+
+/**
+ * @swagger
+ * /bookings/{id}/pay:
+ *   post:
+ *     summary: Effectuer un paiement sur une réservation en attente
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - amount
+ *             properties:
+ *               amount:
+ *                 type: number
+ *                 description: Montant à payer
+ *               paymentMethod:
+ *                 type: string
+ *                 enum: [cash, mobile_money, bank_transfer, card]
+ *                 description: Méthode de paiement
+ *           example:
+ *             amount: 200
+ *             paymentMethod: "cash"
+ *     responses:
+ *       200:
+ *         description: Paiement effectué avec succès
+ *       400:
+ *         description: Montant invalide ou réservation non en attente
+ *       404:
+ *         description: Réservation non trouvée
+ */
+router.post('/:id/pay', payBooking);
 
 module.exports = router;

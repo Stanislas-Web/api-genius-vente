@@ -15,8 +15,10 @@ Module complet de gestion d'hôtel intégré à l'API Genius Vente. Ce module pe
 1. [Types de Chambres (RoomTypes)](#types-de-chambres)
 2. [Chambres (Rooms)](#chambres)
 3. [Réservations (Bookings)](#réservations)
-4. [Factures (Invoices)](#factures)
-5. [Exemples de flux complets](#exemples-de-flux)
+4. [Paiement sur réservation](#paiement-sur-réservation)
+5. [Rapports des réservations](#rapports-des-réservations)
+6. [Factures (Invoices)](#factures)
+7. [Exemples de flux complets](#exemples-de-flux)
 
 ---
 
@@ -217,7 +219,8 @@ Crée une réservation. Le montant est calculé automatiquement selon la durée 
   "checkIn": "2026-03-20T14:00:00Z",
   "checkOut": "2026-03-25T11:00:00Z",
   "rateType": "standard",
-  "notes": "Client régulier"
+  "notes": "Client régulier",
+  "nomFemme": "Marie Dupont"
 }
 ```
 
@@ -231,9 +234,12 @@ Crée une réservation. Le montant est calculé automatiquement selon la durée 
   "checkOut": "2026-04-20T11:00:00Z",
   "rateType": "negotiated",
   "negotiatedRate": 1000,
-  "notes": "Tarif spécial long séjour (30 jours)"
+  "notes": "Tarif spécial long séjour (30 jours)",
+  "nomFemme": ""
 }
 ```
+
+> **Note :** Le champ `nomFemme` est **optionnel**. Il permet d'enregistrer le nom de la femme du client.
 
 **Logique de calcul automatique (si `rateType: "standard"`):**
 - **< 12h** → `heures × hourlyRate`
@@ -257,6 +263,9 @@ Crée une réservation. Le montant est calculé automatiquement selon la durée 
     "rateType": "standard",
     "calculatedAmount": 500,
     "finalAmount": 500,
+    "paidAmount": 0,
+    "remainingAmount": 500,
+    "nomFemme": "Marie Dupont",
     "createdAt": "2026-03-19T06:00:00.000Z"
   }
 }
@@ -341,6 +350,191 @@ Si `checkOut` n'est pas fourni, utilise la date/heure actuelle.
 **POST** `/bookings/:id/cancel`
 
 Annule une réservation et libère la chambre.
+
+---
+
+## Paiement sur réservation
+
+### 8. Effectuer un paiement sur une réservation en attente
+
+**POST** `/bookings/:id/pay`
+
+Effectue un paiement (total ou partiel) sur une réservation en statut `pending`. Le paiement peut être effectué en plusieurs fois.
+
+**Body:**
+```json
+{
+  "amount": 200,
+  "paymentMethod": "cash"
+}
+```
+
+**Champs du body:**
+- `amount` (required): Montant à payer (doit être > 0)
+- `paymentMethod` (optional): Méthode de paiement (`cash`, `mobile_money`, `bank_transfer`, `card`). Défaut: `cash`
+
+**Règles:**
+- Le paiement ne peut être effectué que sur une réservation **en attente (pending)**
+- Le montant ne peut pas dépasser le montant restant à payer
+- Les paiements partiels sont cumulés
+
+**Réponse (200) - Paiement partiel:**
+```json
+{
+  "message": "Paiement partiel effectué",
+  "booking": {...},
+  "paymentDetails": {
+    "amountPaid": 200,
+    "totalPaid": 200,
+    "remainingAmount": 300,
+    "finalAmount": 500,
+    "paymentMethod": "cash",
+    "paymentDate": "2026-03-20T10:30:00.000Z"
+  }
+}
+```
+
+**Réponse (200) - Paiement complet:**
+```json
+{
+  "message": "Paiement complet effectué",
+  "booking": {...},
+  "paymentDetails": {
+    "amountPaid": 300,
+    "totalPaid": 500,
+    "remainingAmount": 0,
+    "finalAmount": 500,
+    "paymentMethod": "mobile_money",
+    "paymentDate": "2026-03-20T11:00:00.000Z"
+  }
+}
+```
+
+---
+
+## Rapports des réservations
+
+### 9. Rapport résumé
+
+**GET** `/bookings/reports/summary?startDate=2026-03-01&endDate=2026-03-31`
+
+Retourne un résumé complet des réservations avec totaux, statistiques par statut, par jour, par type de tarif et par méthode de paiement.
+
+**Query Parameters:**
+- `startDate` (optional): Date de début (filtre sur checkIn)
+- `endDate` (optional): Date de fin
+- `status` (optional): Filtrer par statut
+
+**Réponse (200):**
+```json
+{
+  "summary": {
+    "totalBookings": 45,
+    "totalFinalAmount": 22500,
+    "totalPaidAmount": 18000,
+    "totalRemainingAmount": 4500,
+    "averageAmount": 500,
+    "minAmount": 50,
+    "maxAmount": 2000
+  },
+  "bookingsByStatus": [
+    { "_id": "checked-out", "count": 20, "totalAmount": 12000, "totalPaid": 12000 },
+    { "_id": "pending", "count": 15, "totalAmount": 7500, "totalPaid": 3000 },
+    { "_id": "checked-in", "count": 8, "totalAmount": 2500, "totalPaid": 2500 },
+    { "_id": "cancelled", "count": 2, "totalAmount": 500, "totalPaid": 500 }
+  ],
+  "bookingsByDay": [
+    { "_id": "2026-03-20", "count": 5, "totalAmount": 2500, "totalPaid": 2000 },
+    { "_id": "2026-03-21", "count": 3, "totalAmount": 1500, "totalPaid": 1500 }
+  ],
+  "bookingsByRateType": [
+    { "_id": "standard", "count": 35, "totalAmount": 17500 },
+    { "_id": "negotiated", "count": 10, "totalAmount": 5000 }
+  ],
+  "bookingsByPaymentMethod": [
+    { "_id": "cash", "count": 25, "totalPaid": 12000 },
+    { "_id": "mobile_money", "count": 10, "totalPaid": 5000 },
+    { "_id": "bank_transfer", "count": 3, "totalPaid": 1000 }
+  ]
+}
+```
+
+---
+
+### 10. Rapport détaillé
+
+**GET** `/bookings/reports/detailed?startDate=2026-03-01&endDate=2026-03-31&status=checked-out&page=1&limit=50`
+
+Retourne la liste détaillée des réservations avec informations enrichies: durée de séjour, heures formatées, nom de la chambre, statut de paiement.
+
+**Query Parameters:**
+- `startDate`, `endDate`: Période
+- `status`: Filtrer par statut
+- `roomId`: Filtrer par chambre
+- `page`, `limit`: Pagination
+
+**Réponse (200):**
+```json
+{
+  "bookings": [
+    {
+      "_id": "6734be089acec1931a6e0b44",
+      "clientName": "Jean Dupont",
+      "nomFemme": "Marie Dupont",
+      "checkIn": "2026-03-20T14:00:00.000Z",
+      "checkOut": "2026-03-25T11:00:00.000Z",
+      "checkInFormatted": "20/03/2026 15:00:00",
+      "checkOutFormatted": "25/03/2026 12:00:00",
+      "durationHours": 117,
+      "durationText": "4j 21h",
+      "status": "checked-out",
+      "finalAmount": 500,
+      "paidAmount": 500,
+      "remainingAmount": 0,
+      "roomName": "Suite 201",
+      "roomTypeName": "Suite Deluxe",
+      "isPaid": true,
+      "paymentStatus": "paid",
+      "paymentMethod": "cash"
+    }
+  ],
+  "totalPages": 1,
+  "currentPage": 1,
+  "total": 1
+}
+```
+
+**Valeurs `paymentStatus`:**
+- `paid`: Entièrement payé
+- `partial`: Paiement partiel
+- `unpaid`: Non payé
+- `no-amount`: Montant non défini
+
+---
+
+### 11. Rapport par chambre
+
+**GET** `/bookings/reports/by-room?startDate=2026-03-01&endDate=2026-03-31`
+
+Retourne les statistiques de réservations regroupées par chambre.
+
+**Réponse (200):**
+```json
+{
+  "reportByRoom": [
+    {
+      "roomId": "6734be089acec1931a6e0b43",
+      "roomName": "Suite 201",
+      "roomTypeName": "Suite Deluxe",
+      "totalBookings": 12,
+      "totalAmount": 6000,
+      "totalPaid": 5500,
+      "totalRemaining": 500,
+      "avgAmount": 500
+    }
+  ]
+}
+```
 
 ---
 

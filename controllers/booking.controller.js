@@ -40,7 +40,9 @@ exports.createBooking = async (req, res) => {
       rateType,
       negotiatedRate,
       notes,
-      nomFemme 
+      nomFemme,
+      paidAmount,
+      paymentMethod
     } = req.body;
 
     const room = await Room.findOne({ _id: roomId, companyId }).populate('roomTypeId');
@@ -87,6 +89,19 @@ exports.createBooking = async (req, res) => {
       notes,
       nomFemme: nomFemme || ''
     });
+
+    // Paiement direct lors de la réservation (optionnel)
+    if (paidAmount && paidAmount > 0) {
+      if (finalAmount > 0 && paidAmount > finalAmount) {
+        return res.status(400).json({ 
+          message: `Montant payé (${paidAmount}) dépasse le montant total (${finalAmount})` 
+        });
+      }
+      booking.paidAmount = paidAmount;
+      booking.remainingAmount = finalAmount > 0 ? finalAmount - paidAmount : 0;
+      booking.paymentMethod = paymentMethod || 'cash';
+      booking.paymentDate = new Date();
+    }
 
     await booking.save();
     await booking.populate('roomId');

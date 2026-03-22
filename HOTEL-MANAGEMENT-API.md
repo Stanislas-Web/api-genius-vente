@@ -17,8 +17,9 @@ Module complet de gestion d'hôtel intégré à l'API Genius Vente. Ce module pe
 3. [Réservations (Bookings)](#réservations)
 4. [Paiement sur réservation](#paiement-sur-réservation)
 5. [Rapports des réservations](#rapports-des-réservations)
-6. [Factures (Invoices)](#factures)
-7. [Exemples de flux complets](#exemples-de-flux)
+6. [Dashboard Hôtel](#dashboard-hôtel)
+7. [Factures (Invoices)](#factures)
+8. [Exemples de flux complets](#exemples-de-flux)
 
 ---
 
@@ -208,7 +209,25 @@ Crée une nouvelle chambre. Les tarifs sont hérités du type, mais peuvent êtr
 
 Crée une réservation. Le montant est calculé automatiquement selon la durée et les tarifs.
 
-**Body (Tarif Standard):**
+**Body (Tarif Standard avec paiement direct):**
+```json
+{
+  "roomId": "6734be089acec1931a6e0b43",
+  "clientName": "Jean Dupont",
+  "clientPhone": "+243826016607",
+  "clientEmail": "jean@example.com",
+  "cardNumber": "1234-5678-9012",
+  "checkIn": "2026-03-20T14:00:00Z",
+  "checkOut": "2026-03-25T11:00:00Z",
+  "rateType": "standard",
+  "notes": "Client régulier",
+  "nomFemme": "Marie Dupont",
+  "paidAmount": 200,
+  "paymentMethod": "cash"
+}
+```
+
+**Body (Tarif Standard sans paiement):**
 ```json
 {
   "roomId": "6734be089acec1931a6e0b43",
@@ -240,6 +259,8 @@ Crée une réservation. Le montant est calculé automatiquement selon la durée 
 ```
 
 > **Note :** Le champ `nomFemme` est **optionnel**. Il permet d'enregistrer le nom de la femme du client.
+
+> **Paiement direct :** Vous pouvez payer directement lors de la création de la réservation en ajoutant `paidAmount` et `paymentMethod` dans le body. Ces champs sont **optionnels**.
 
 **Logique de calcul automatique (si `rateType: "standard"`):**
 - **< 12h** → `heures × hourlyRate`
@@ -533,6 +554,91 @@ Retourne les statistiques de réservations regroupées par chambre.
       "avgAmount": 500
     }
   ]
+}
+```
+
+---
+
+## Dashboard Hôtel
+
+### 12. Tableau de bord hôtel
+
+**GET** `/dashboard/hotel`
+
+Retourne les statistiques complètes de l'hôtel : chambres, réservations, revenus, taux d'occupation.
+
+**Réponse (200):**
+```json
+{
+  "overview": {
+    "totalRooms": 25,
+    "totalRoomTypes": 4,
+    "totalBookings": 120,
+    "occupancyRate": 72,
+    "bookingsToday": 5,
+    "checkInsToday": 3,
+    "checkOutsToday": 2
+  },
+  "rooms": {
+    "total": 25,
+    "available": 7,
+    "occupied": 12,
+    "reserved": 6,
+    "maintenance": 0
+  },
+  "bookings": {
+    "total": 120,
+    "byStatus": [
+      { "status": "pending", "count": 15 },
+      { "status": "checked-in", "count": 12 },
+      { "status": "checked-out", "count": 85 },
+      { "status": "cancelled", "count": 8 }
+    ]
+  },
+  "revenue": {
+    "today": {
+      "total": 1500,
+      "paid": 1200,
+      "bookings": 5
+    },
+    "thisMonth": {
+      "total": 45000,
+      "paid": 38000,
+      "remaining": 7000,
+      "bookings": 85
+    },
+    "byDay": [
+      { "_id": "2026-03-20", "count": 5, "revenue": 2500, "paid": 2000 },
+      { "_id": "2026-03-21", "count": 3, "revenue": 1500, "paid": 1500 }
+    ],
+    "byPaymentMethod": [
+      { "method": "cash", "count": 40, "totalPaid": 20000 },
+      { "method": "mobile_money", "count": 15, "totalPaid": 8000 },
+      { "method": "bank_transfer", "count": 5, "totalPaid": 3000 },
+      { "method": "card", "count": 10, "totalPaid": 7000 }
+    ]
+  },
+  "topRooms": [
+    { "roomNumber": "Suite 201", "totalBookings": 12, "totalRevenue": 6000, "totalPaid": 5500 },
+    { "roomNumber": "VIP 301", "totalBookings": 10, "totalRevenue": 5000, "totalPaid": 5000 }
+  ],
+  "recentBookings": [
+    {
+      "clientName": "Jean Dupont",
+      "nomFemme": "Marie Dupont",
+      "clientPhone": "+243826016607",
+      "checkIn": "2026-03-22T14:00:00.000Z",
+      "status": "pending",
+      "finalAmount": 500,
+      "paidAmount": 200,
+      "remainingAmount": 300,
+      "paymentMethod": "cash"
+    }
+  ],
+  "period": {
+    "today": "2026-03-22",
+    "month": "mars 2026"
+  }
 }
 ```
 

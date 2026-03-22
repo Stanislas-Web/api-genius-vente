@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { getSchoolDashboard } = require('../controllers/dashboard.controller');
+const { getSchoolDashboard, getHotelDashboard } = require('../controllers/dashboard.controller');
 
 /**
  * @swagger
@@ -121,5 +121,71 @@ const { getSchoolDashboard } = require('../controllers/dashboard.controller');
  *         description: Erreur serveur
  */
 router.get('/school', getSchoolDashboard);
+
+/**
+ * @swagger
+ * /dashboard/hotel:
+ *   get:
+ *     summary: Récupérer le tableau de bord complet de l'hôtel
+ *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Statistiques du dashboard hôtel
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 overview:
+ *                   type: object
+ *                   properties:
+ *                     totalRooms:
+ *                       type: integer
+ *                     totalRoomTypes:
+ *                       type: integer
+ *                     totalBookings:
+ *                       type: integer
+ *                     occupancyRate:
+ *                       type: integer
+ *                     bookingsToday:
+ *                       type: integer
+ *                     checkInsToday:
+ *                       type: integer
+ *                     checkOutsToday:
+ *                       type: integer
+ *                 rooms:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                     available:
+ *                       type: integer
+ *                     occupied:
+ *                       type: integer
+ *                     reserved:
+ *                       type: integer
+ *                     maintenance:
+ *                       type: integer
+ *                 revenue:
+ *                   type: object
+ *                   properties:
+ *                     today:
+ *                       type: object
+ *                     thisMonth:
+ *                       type: object
+ *                     byDay:
+ *                       type: array
+ *                     byPaymentMethod:
+ *                       type: array
+ *                 topRooms:
+ *                   type: array
+ *                 recentBookings:
+ *                   type: array
+ *       500:
+ *         description: Erreur serveur
+ */
+router.get('/hotel', getHotelDashboard);
 
 module.exports = router;

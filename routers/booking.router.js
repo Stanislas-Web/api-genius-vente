@@ -47,6 +47,8 @@ const {
  *             negotiatedRate: 400
  *             notes: "Client VIP"
  *             nomFemme: "Marie Dupont"
+ *             paidAmount: 200
+ *             paymentMethod: "cash"
  *     responses:
  *       201:
  *         description: Réservation créée avec succès

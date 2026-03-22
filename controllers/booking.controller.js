@@ -605,39 +605,36 @@ exports.getBookingReportByRoom = async (req, res) => {
         }
       },
       {
-        $lookup: {
-          from: 'rooms',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'room'
-        }
-      },
-      { $unwind: { path: '$room', preserveNullAndEmptyArrays: true } },
-      {
-        $lookup: {
-          from: 'roomtypes',
-          localField: 'room.roomTypeId',
-          foreignField: '_id',
-          as: 'roomType'
-        }
-      },
-      { $unwind: { path: '$roomType', preserveNullAndEmptyArrays: true } },
-      {
-        $project: {
+        $addFields: {
           roomId: '$_id',
-          roomName: { $ifNull: ['$room.name', '$room.number'] },
-          roomTypeName: '$roomType.name',
-          totalBookings: 1,
-          totalAmount: 1,
-          totalPaid: 1,
-          totalRemaining: 1,
           avgAmount: { $round: ['$avgAmount', 2] }
         }
       },
       { $sort: { totalAmount: -1 } }
     ]);
 
-    res.status(200).json({ reportByRoom });
+    // Enrichir avec roomNumber et roomTypeName via populate
+    const Room = require('../models/room.model');
+    const roomIds = reportByRoom.map(r => r._id).filter(Boolean);
+    const rooms = await Room.find({ _id: { $in: roomIds } }).populate('roomTypeId', 'name').lean();
+    const roomMap = {};
+    rooms.forEach(r => {
+      roomMap[r._id.toString()] = {
+        roomNumber: r.roomNumber,
+        roomTypeName: r.roomTypeId ? r.roomTypeId.name : null
+      };
+    });
+
+    const enrichedReport = reportByRoom.map(r => {
+      const info = r._id ? roomMap[r._id.toString()] : null;
+      return {
+        ...r,
+        roomNumber: info ? info.roomNumber : null,
+        roomTypeName: info ? info.roomTypeName : null
+      };
+    });
+
+    res.status(200).json({ reportByRoom: enrichedReport });
   } catch (error) {
     console.error('Error generating booking report by room:', error);
     res.status(500).json({ message: 'Error generating booking report by room', error: error.message });

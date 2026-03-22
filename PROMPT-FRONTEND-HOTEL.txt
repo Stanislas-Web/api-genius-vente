@@ -109,13 +109,15 @@ Endpoint : GET /bookings/reports/by-room?startDate=...&endDate=...
 Afficher un tableau :
 | Colonne          | Champ          |
 |------------------|----------------|
-| Chambre          | roomName       |
+| Chambre          | roomNumber     |
 | Type             | roomTypeName   |
 | Nb Réservations  | totalBookings  |
 | Revenu Total     | totalAmount    |
 | Total Payé       | totalPaid      |
 | Reste            | totalRemaining |
 | Moyenne          | avgAmount      |
+
+Note : si roomNumber est null, la chambre a été supprimée — afficher "Chambre supprimée" ou masquer la ligne.
 
 
 =============================================================
